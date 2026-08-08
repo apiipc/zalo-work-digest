@@ -121,23 +121,14 @@ export function parseLicenseKey(raw) {
 }
 
 export function ensureFreeTrial({ days = 5, configDir = getConfigDir() } = {}) {
-  const state = readState(configDir);
-  if (state?.activatedAt) return state;
-  const now = Date.now();
-  const trialDays = Math.max(1, Number(days) || 5);
-  const next = {
-    source: "free-trial",
-    type: "trial",
-    days: trialDays,
-    keyId: `free-${machineId()}`,
-    fingerprint: machineId(),
-    activatedAt: now,
-    expiresAt: now + trialDays * 86400000,
-    note: "Dùng thử miễn phí trên máy này",
-    fullKey: null
-  };
-  writeState(next, configDir);
-  return next;
+  // Giữ hàm để tương thích cũ — không còn tự cấp dùng thử.
+  // Dùng thử chỉ qua mã trial tạo trên portal (ZWD-XXXX-...).
+  void days;
+  return readState(configDir);
+}
+
+function isKeyActivated(state) {
+  return Boolean(state?.activatedAt && state.source === "key" && state.fullKey);
 }
 
 async function callLicenseServer(key) {
@@ -290,17 +281,36 @@ function statusFromState(state) {
   };
 }
 
-const SERVER_CHECK_MS = 5 * 60 * 1000;
+const SERVER_CHECK_MS = 30 * 1000;
 
-/** Đồng bộ với server (thu hồi / đổi máy). */
+function wipeLicense(configDir = getConfigDir()) {
+  try { fs.unlinkSync(licensePath(configDir)); } catch {}
+}
+
+function blockedStatus(message) {
+  return {
+    ok: false,
+    licensed: false,
+    type: null,
+    label: "Mã không còn hiệu lực",
+    message: message || "Mã đã bị xóa / thu hồi trên hệ thống. Nhập mã mới để tiếp tục.",
+    expiresAt: null,
+    daysLeft: 0,
+    activatedAt: null,
+    keyPreview: null
+  };
+}
+
+/** Đồng bộ với server (thu hồi / xóa / đổi máy). */
 export async function syncLicenseWithServer({ configDir = getConfigDir(), force = false } = {}) {
   let state = readState(configDir);
-  if (!state?.activatedAt) {
-    ensureFreeTrial({ configDir });
-    state = readState(configDir);
+  // Bản cũ từng tự cấp free-trial → vô hiệu, bắt nhập mã.
+  if (state?.source === "free-trial" || (state?.activatedAt && !state.fullKey)) {
+    wipeLicense(configDir);
+    state = null;
   }
-  if (!state?.fullKey || state.source === "free-trial") {
-    return statusFromState(state);
+  if (!isKeyActivated(state)) {
+    return statusFromState(null);
   }
   const server = licenseServerUrl();
   if (!server) return statusFromState(state);
@@ -317,26 +327,35 @@ export async function syncLicenseWithServer({ configDir = getConfigDir(), force 
       res.status === 404 ||
       ["revoked", "device_limit", "not_registered"].includes(data.code)
     ) {
-      state.serverBlocked = true;
-      state.serverMessage = data.error || "Mã không còn hiệu lực.";
-      state.lastServerCheckAt = Date.now();
-      writeState(state, configDir);
-      return statusFromState(state);
+      wipeLicense(configDir);
+      return blockedStatus(data.error || "Mã đã bị xóa / thu hồi trên hệ thống.");
     }
     if (res.ok) {
       state.serverBlocked = false;
       state.serverMessage = "";
       state.lastServerCheckAt = Date.now();
       writeState(state, configDir);
+      return statusFromState(state);
+    }
+    // 503 thiếu Redis trên server → không cho dùng (tránh lách khi xóa mã)
+    if (res.status === 503) {
+      wipeLicense(configDir);
+      return blockedStatus(data.error || "Máy chủ license không sẵn sàng.");
     }
   } catch (error) {
     console.warn("syncLicenseWithServer:", error.message);
+    // Mất mạng tạm: cho dùng tối đa 2 giờ kể từ lần check OK gần nhất
+    const graceMs = 2 * 60 * 60 * 1000;
+    if (last && Date.now() - last > graceMs) {
+      wipeLicense(configDir);
+      return blockedStatus("Không kiểm tra được mã với máy chủ quá lâu. Kiểm tra mạng rồi kích hoạt lại.");
+    }
   }
   return statusFromState(readState(configDir));
 }
 
-export async function getLicenseStatus(configDir = getConfigDir()) {
-  return syncLicenseWithServer({ configDir });
+export async function getLicenseStatus(configDir = getConfigDir(), { force = false } = {}) {
+  return syncLicenseWithServer({ configDir, force });
 }
 
 export async function requireLicense(req, res, next) {

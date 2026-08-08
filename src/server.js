@@ -168,7 +168,7 @@ app.get("/api/app-mode", (_req, res) => res.json({
 }));
 
 app.get("/api/license", asyncRoute(async (_req, res) => {
-  res.json(await getLicenseStatus());
+  res.json(await getLicenseStatus(undefined, { force: true }));
 }));
 app.post("/api/license/activate", asyncRoute(async (req, res) => {
   try {

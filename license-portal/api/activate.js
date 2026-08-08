@@ -38,7 +38,7 @@ export default async function handler(req, res) {
       return sendJson(res, 404, {
         ok: false,
         code: "not_registered",
-        error: "Mã không có trên hệ thống (chỉ dùng mã tạo từ trang quản trị)."
+        error: "Mã đã bị xóa hoặc không có trên hệ thống."
       });
     }
     if (row.status === "revoked" || row.status === "deleted") {
