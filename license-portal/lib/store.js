@@ -1,10 +1,13 @@
 /**
- * Lưu sổ mã trên Upstash Redis (REST) — miễn phí, chạy tốt trên Vercel.
- * Env: UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN
+ * Lưu sổ mã trên Upstash Redis (REST) nếu có env.
+ * Không có Redis: vẫn tạo mã được, chỉ không lưu danh sách cloud.
  */
 const KEYS_ZSET = "zwd:licenses:ids";
 const KEY_PREFIX = "zwd:license:";
-const SESSION_PREFIX = "zwd:session:";
+
+export function hasRedis() {
+  return Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+}
 
 function redisEnv() {
   const url = process.env.UPSTASH_REDIS_REST_URL;
@@ -36,18 +39,21 @@ async function redis(...command) {
 }
 
 export async function saveLicense(row) {
+  if (!hasRedis()) return { ...row, persisted: false };
   await redis("SET", KEY_PREFIX + row.id, JSON.stringify(row));
   await redis("ZADD", KEYS_ZSET, String(row.createdAt || Date.now()), row.id);
-  return row;
+  return { ...row, persisted: true };
 }
 
 export async function getLicense(id) {
+  if (!hasRedis()) return null;
   const raw = await redis("GET", KEY_PREFIX + id);
   if (!raw) return null;
   return typeof raw === "string" ? JSON.parse(raw) : raw;
 }
 
 export async function listLicenses({ q = "", status = "", limit = 200 } = {}) {
+  if (!hasRedis()) return [];
   const ids = (await redis("ZREVRANGE", KEYS_ZSET, "0", String(Math.max(0, limit - 1)))) || [];
   const out = [];
   const query = String(q || "").trim().toLowerCase();
@@ -66,24 +72,12 @@ export async function listLicenses({ q = "", status = "", limit = 200 } = {}) {
 }
 
 export async function updateLicense(id, patch) {
+  if (!hasRedis()) {
+    throw Object.assign(new Error("Cần Upstash Redis để cập nhật trạng thái mã trên cloud"), { status: 400 });
+  }
   const row = await getLicense(id);
   if (!row) throw Object.assign(new Error("Không tìm thấy mã"), { status: 404 });
   Object.assign(row, patch, { updatedAt: Date.now() });
   await saveLicense(row);
   return row;
-}
-
-export async function createSession(token, ttlSec = 60 * 60 * 24 * 14) {
-  await redis("SET", SESSION_PREFIX + token, "1", "EX", String(ttlSec));
-}
-
-export async function sessionExists(token) {
-  if (!token) return false;
-  const v = await redis("GET", SESSION_PREFIX + token);
-  return Boolean(v);
-}
-
-export async function deleteSession(token) {
-  if (!token) return;
-  await redis("DEL", SESSION_PREFIX + token);
 }

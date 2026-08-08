@@ -1,5 +1,5 @@
 import { createLicenseKey } from "../lib/license.js";
-import { listLicenses, saveLicense } from "../lib/store.js";
+import { hasRedis, listLicenses, saveLicense } from "../lib/store.js";
 import { requireAdmin, readJson, sendJson } from "../lib/http.js";
 
 export default async function handler(req, res) {
@@ -12,7 +12,11 @@ export default async function handler(req, res) {
         q: url.searchParams.get("q") || "",
         status: url.searchParams.get("status") || ""
       });
-      return sendJson(res, 200, { keys });
+      return sendJson(res, 200, {
+        keys,
+        storage: hasRedis() ? "upstash" : "none",
+        warning: hasRedis() ? null : "Chưa gắn Upstash — tạo mã vẫn được nhưng không lưu danh sách cloud."
+      });
     }
 
     if (req.method === "POST") {
@@ -37,10 +41,14 @@ export default async function handler(req, res) {
           createdAt: Date.now(),
           activations: []
         };
-        await saveLicense(row);
-        issued.push(row);
+        const saved = await saveLicense(row);
+        issued.push(saved);
       }
-      return sendJson(res, 201, { issued });
+      return sendJson(res, 201, {
+        issued,
+        persisted: hasRedis(),
+        warning: hasRedis() ? null : "Mã đã tạo & có thể copy. Chưa lưu danh sách vì thiếu Upstash Redis."
+      });
     }
 
     return sendJson(res, 405, { error: "Method not allowed" });

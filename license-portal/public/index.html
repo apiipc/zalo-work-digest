@@ -192,7 +192,10 @@
         });
         const first = data.issued?.[0];
         if (first?.key) await navigator.clipboard.writeText(first.key).catch(() => {});
-        $("#createMsg").textContent = `Đã tạo ${data.issued.length} mã` + (first ? " (đã copy)" : "");
+        let msg = `Đã tạo ${data.issued.length} mã` + (first ? " — đã copy vào clipboard." : "");
+        if (first?.key) msg += `\n${first.key}`;
+        if (data.warning) msg += `\n${data.warning}`;
+        $("#createMsg").textContent = msg;
         $("#customer").value = "";
         await load();
       } catch (err) {
