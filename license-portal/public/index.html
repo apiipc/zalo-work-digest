@@ -79,7 +79,7 @@
         <label>Số máy tối đa<input id="maxDevices" type="number" min="1" max="10" value="1" /></label>
         <label>Số lượng<input id="count" type="number" min="1" max="50" value="1" /></label>
         <div class="toolbar"><button type="button" id="createBtn">Tạo mã</button></div>
-        <p class="hint">Cần Upstash Redis trên Vercel để lưu IP, chống share key, thu hồi/xóa.</p>
+        <p class="hint" id="storageHint"></p>
         <div class="msg" id="createMsg"></div>
       </div>
       <div class="card">
@@ -229,8 +229,15 @@
     async function load() {
       try {
         const data = await api(`/api/licenses`);
-        if (data.warning) {
-          $("#createMsg").textContent = data.warning;
+        const hint = $("#storageHint");
+        if (data.warning || data.storage === "none") {
+          hint.textContent = data.warning || "Chưa gắn Upstash Redis — thêm UPSTASH_REDIS_REST_URL + TOKEN rồi Redeploy.";
+          hint.style.color = "#c9372c";
+          $("#createMsg").textContent = data.warning || "";
+        } else {
+          hint.textContent = "Đã kết nối cloud — mã ngắn, IP, chống share, thu hồi/xóa đều hoạt động.";
+          hint.style.color = "";
+          if (($("#createMsg").textContent || "").includes("Upstash")) $("#createMsg").textContent = "";
         }
         const rows = Array.isArray(data.keys) ? data.keys : [];
         writeLocal(rows);
