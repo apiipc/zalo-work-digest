@@ -222,9 +222,12 @@
           <div class="settings-card-top">
             <h2>Bản quyền / mã kích hoạt</h2>
           </div>
-          <p class="hint" id="licenseSettingsLabel">Đang kiểm tra…</p>
-          <p class="hint" id="licenseSettingsMessage"></p>
-          <label>Nhập mã mới (dùng thử hoặc vĩnh viễn)
+          <div class="license-status-box" id="licenseSettingsBox">
+            <p id="licenseSettingsLabel">Đang kiểm tra…</p>
+            <p class="hint" id="licenseSettingsMessage"></p>
+            <dl class="license-meta" id="licenseSettingsMeta"></dl>
+          </div>
+          <label>Nhập mã kích hoạt
             <input id="licenseSettingsKey" type="text" spellcheck="false" autocomplete="off" placeholder="ZWD-XXXX-XXXX-XXXX">
           </label>
           <div class="toolbar">

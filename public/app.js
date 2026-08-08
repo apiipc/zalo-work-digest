@@ -62,6 +62,27 @@ const api = async (url, options = {}) => {
   return data;
 };
 
+function formatLicenseWhen(ts) {
+  if (!ts) return "—";
+  return new Date(ts).toLocaleString("vi-VN");
+}
+
+function licenseMetaHtml(lic) {
+  if (!lic) return "";
+  const rows = [];
+  rows.push(["Trạng thái", lic.label || "—"]);
+  if (lic.type === "lifetime") {
+    rows.push(["Loại", "Vĩnh viễn"]);
+  } else if (lic.type === "trial") {
+    rows.push(["Loại", "Dùng thử"]);
+    rows.push(["Số ngày còn lại", lic.daysLeft == null ? "—" : String(lic.daysLeft)]);
+  }
+  rows.push(["Ngày kích hoạt", formatLicenseWhen(lic.activatedAt)]);
+  if (lic.expiresAt) rows.push(["Hết hạn", formatLicenseWhen(lic.expiresAt)]);
+  if (lic.keyPreview) rows.push(["Mã", lic.keyPreview]);
+  return rows.map(([k, v]) => `<dt>${k}</dt><dd>${escapeHtml(v)}</dd>`).join("");
+}
+
 function showLicenseGate(license) {
   const gate = $("#licenseGate");
   if (!gate) return;
@@ -70,9 +91,12 @@ function showLicenseGate(license) {
   if (license) {
     if ($("#licenseGateMessage")) $("#licenseGateMessage").textContent = license.message || "Cần mã kích hoạt.";
     if ($("#licenseGateStatus")) {
-      $("#licenseGateStatus").textContent = license.label
-        ? `${license.label}${license.expiresAt ? ` · hết hạn ${new Date(license.expiresAt).toLocaleString("vi-VN")}` : ""}`
-        : "";
+      const parts = [];
+      if (license.label) parts.push(license.label);
+      if (license.activatedAt) parts.push(`Kích hoạt: ${formatLicenseWhen(license.activatedAt)}`);
+      if (license.daysLeft != null && license.type === "trial") parts.push(`Còn ${license.daysLeft} ngày`);
+      if (license.expiresAt) parts.push(`Hết hạn: ${formatLicenseWhen(license.expiresAt)}`);
+      $("#licenseGateStatus").textContent = parts.join(" · ");
     }
   }
 }
@@ -86,6 +110,7 @@ async function loadLicense() {
   const lic = await fetch("/api/license").then(r => r.json());
   if ($("#licenseSettingsLabel")) $("#licenseSettingsLabel").textContent = lic.label || "—";
   if ($("#licenseSettingsMessage")) $("#licenseSettingsMessage").textContent = lic.message || "";
+  if ($("#licenseSettingsMeta")) $("#licenseSettingsMeta").innerHTML = licenseMetaHtml(lic);
   return lic;
 }
 

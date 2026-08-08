@@ -777,6 +777,16 @@ body.zalo-offline #dataLocationCard input {
   margin-bottom: 12px;
   font-size: 0.92rem;
 }
+.license-status-box > p { margin: 0 0 6px; }
+.license-meta {
+  margin: 8px 0 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  font-size: 0.88rem;
+}
+.license-meta dt { color: var(--muted); }
+.license-meta dd { margin: 0; font-weight: 600; }
 .license-gate .auth-error { color: var(--danger); min-height: 1.2em; margin-top: 8px; }
 body.license-locked > aside,
 body.license-locked > main { filter: blur(2px); pointer-events: none; user-select: none; }
