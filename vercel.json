@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "buildCommand": "node scripts/sync-vercel-license.js",
+  "outputDirectory": "license-portal/public",
+  "installCommand": "echo skip-install",
+  "framework": null
+}

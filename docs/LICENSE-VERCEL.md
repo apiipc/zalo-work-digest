@@ -1,6 +1,6 @@
 # License Portal trên Vercel
 
-Quản lý / tạo / thu hồi mã kích hoạt qua web trên Vercel (không chạy app Zalo trên Vercel).
+Quản lý / tạo / thu hồi mã kích hoạt qua web trên Vercel.
 
 ## 1. Tạo Redis miễn phí (Upstash)
 
@@ -9,49 +9,40 @@ Quản lý / tạo / thu hồi mã kích hoạt qua web trên Vercel (không ch�
 
 ## 2. Deploy lên Vercel
 
-### Cách A — CLI
+**Quan trọng:** Deploy từ **root repo** (file `vercel.json` ở gốc). Không đặt Root Directory = `license-portal` nếu đang dùng cấu hình gốc này.
+
+### GitHub
+
+1. Vercel → Project gắn repo `zalo-work-digest`
+2. Root Directory: **để trống** (`.`)
+3. Framework Preset: **Other**
+4. Thêm Environment Variables → Redeploy
+
+### CLI
 
 ```bash
-cd license-portal
-npx vercel
+npx vercel --prod
 ```
 
-Root Directory khi import GitHub: chọn `license-portal`.
+Khi sửa portal: `node scripts/sync-vercel-license.js` rồi commit.
 
-### Cách B — GitHub
-
-1. Repo đã có sẵn: `https://github.com/apiipc/zalo-work-digest`  
-2. Vercel → Add New Project → chọn repo  
-3. **Root Directory** = `license-portal`  
-4. Deploy
-
-## 3. Biến môi trường (Vercel → Settings → Environment Variables)
+## 3. Biến môi trường
 
 | Biến | Ví dụ |
 |------|--------|
-| `LICENSE_SECRET` | cùng secret với app desktop (quan trọng!) |
-| `LICENSE_ADMIN_PASSWORD` | mật khẩu trang admin của bạn |
+| `LICENSE_SECRET` | cùng secret với app desktop |
+| `LICENSE_ADMIN_PASSWORD` | mật khẩu trang admin |
 | `UPSTASH_REDIS_REST_URL` | từ Upstash |
 | `UPSTASH_REDIS_REST_TOKEN` | từ Upstash |
 
-Redeploy sau khi thêm env.
-
 ## 4. Dùng
 
-Mở `https://YOUR-PROJECT.vercel.app` → đăng nhập mật khẩu admin → tạo mã trial/vĩnh viễn → Copy gửi khách.
+Mở `https://YOUR-PROJECT.vercel.app` → đăng nhập → tạo / copy / thu hồi mã.
 
-API kích hoạt (app desktop gọi được):
-
-`POST https://YOUR-PROJECT.vercel.app/api/activate`  
-Body: `{ "key": "ZWD1....", "machineId": "..." }`  
-→ nếu mã **revoked** trên Vercel sẽ bị từ chối.
+API kích hoạt app: `POST /api/activate` body `{ "key": "ZWD1....", "machineId": "..." }`
 
 ## 5. Nối app desktop (tùy chọn)
-
-Trước khi build/chạy app:
 
 ```bash
 set LICENSE_SERVER_URL=https://YOUR-PROJECT.vercel.app
 ```
-
-(hoặc thêm vào môi trường Electron). App sẽ kiểm tra thu hồi trên cloud khi kích hoạt mã.
