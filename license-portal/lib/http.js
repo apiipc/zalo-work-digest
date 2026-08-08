@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { createSession, deleteSession, sessionExists } from "./store.js";
+import { licenseSecret } from "./license.js";
 
 export const COOKIE = "zwd_lic_admin";
 
@@ -17,6 +17,34 @@ export function adminPassword() {
   return String(process.env.LICENSE_ADMIN_PASSWORD || "").trim();
 }
 
+function b64url(buf) {
+  return Buffer.from(buf).toString("base64url");
+}
+
+function sign(data) {
+  return crypto.createHmac("sha256", licenseSecret() + "|admin-session").update(data).digest("base64url");
+}
+
+export function createSessionToken(ttlSec = 60 * 60 * 24 * 14) {
+  const payload = b64url(JSON.stringify({ v: 1, exp: Date.now() + ttlSec * 1000 }));
+  return `${payload}.${sign(payload)}`;
+}
+
+export function verifySessionToken(token) {
+  if (!token || !token.includes(".")) return false;
+  const [payload, sig] = token.split(".");
+  const expect = sign(payload);
+  const a = Buffer.from(sig);
+  const b = Buffer.from(expect);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return false;
+  try {
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    return Number(data.exp) > Date.now();
+  } catch {
+    return false;
+  }
+}
+
 export async function requireAdmin(req) {
   const pwd = adminPassword();
   if (!pwd) {
@@ -24,10 +52,7 @@ export async function requireAdmin(req) {
   }
   const cookies = parseCookies(req.headers.cookie || "");
   const token = cookies[COOKIE];
-  if (!token) {
-    throw Object.assign(new Error("Cần đăng nhập quản trị"), { status: 401 });
-  }
-  if (!(await sessionExists(token))) {
+  if (!verifySessionToken(token)) {
     throw Object.assign(new Error("Cần đăng nhập quản trị"), { status: 401 });
   }
   return true;
@@ -39,14 +64,11 @@ export async function loginAdmin(password) {
   if (String(password || "") !== expect) {
     throw Object.assign(new Error("Mật khẩu không đúng"), { status: 401 });
   }
-  const token = crypto.randomBytes(24).toString("base64url");
-  await createSession(token);
-  return token;
+  return createSessionToken();
 }
 
-export async function logoutAdmin(req) {
-  const cookies = parseCookies(req.headers.cookie || "");
-  await deleteSession(cookies[COOKIE]);
+export async function logoutAdmin() {
+  // cookie-based; client clears via Set-Cookie
 }
 
 export function setSessionCookie(res, token) {

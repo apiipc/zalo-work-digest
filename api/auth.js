@@ -1,4 +1,4 @@
-import { loginAdmin, setSessionCookie, readJson, sendJson, clearSessionCookie, logoutAdmin } from "../lib/http.js";
+import { loginAdmin, setSessionCookie, readJson, sendJson, clearSessionCookie } from "../lib/http.js";
 
 export default async function handler(req, res) {
   try {
@@ -9,7 +9,6 @@ export default async function handler(req, res) {
       return sendJson(res, 200, { ok: true });
     }
     if (req.method === "DELETE") {
-      await logoutAdmin(req);
       clearSessionCookie(res);
       return sendJson(res, 200, { ok: true });
     }
