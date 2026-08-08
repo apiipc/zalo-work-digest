@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quản lý mã — Zalo Work Digest</title>
+  <style>
+    :root { --bg:#f4f7fb; --card:#fff; --ink:#122033; --muted:#607182; --line:#d5e0ea; --accent:#1a86ff; --ok:#0d9f6e; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    h1 { margin: 0 0 6px; font-size: 1.5rem; }
+    .sub { color: var(--muted); margin: 0 0 20px; }
+    .grid { display: grid; gap: 16px; grid-template-columns: 340px 1fr; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+    label { display: block; margin: 10px 0; font-size: .92rem; }
+    input, select, button, textarea { font: inherit; }
+    input, select { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    button { border: 0; background: var(--accent); color: #fff; padding: 9px 14px; border-radius: 8px; cursor: pointer; }
+    button.secondary { background: #e8eef5; color: var(--ink); }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; }
+    code { font-size: .78rem; word-break: break-all; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #e8eef5; font-size: .78rem; }
+    .badge.ok { background: #e5f8f0; color: var(--ok); }
+    .badge.warn { background: #fff4e5; color: #b86a08; }
+    .badge.bad { background: #fdeceb; color: #c9372c; }
+    .hint { color: var(--muted); font-size: .85rem; margin-top: 8px; }
+    .msg { margin-top: 10px; min-height: 1.2em; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Quản lý mã kích hoạt</h1>
+    <p class="sub">Chỉ chạy trên máy bạn (localhost). Tạo mã → copy gửi khách → đánh dấu đã bán / thu hồi trên sổ.</p>
+    <div class="grid">
+      <div class="card">
+        <h2 style="margin:0 0 8px;font-size:1.05rem">Tạo mã mới</h2>
+        <label>Loại
+          <select id="type">
+            <option value="trial">Dùng thử</option>
+            <option value="lifetime">Vĩnh viễn</option>
+          </select>
+        </label>
+        <label>Số ngày dùng thử
+          <select id="days">
+            <option value="3">3 ngày</option>
+            <option value="5" selected>5 ngày</option>
+            <option value="7">7 ngày</option>
+            <option value="14">14 ngày</option>
+            <option value="30">30 ngày</option>
+          </select>
+        </label>
+        <label>Tên khách / Zalo
+          <input id="customer" placeholder="VD: Anh Hải — 09xx" />
+        </label>
+        <label>Ghi chú
+          <input id="note" placeholder="Gói trial / VIP..." />
+        </label>
+        <label>Số lượng
+          <input id="count" type="number" min="1" max="50" value="1" />
+        </label>
+        <div class="toolbar">
+          <button type="button" id="createBtn">Tạo mã</button>
+        </div>
+        <div class="msg" id="createMsg"></div>
+        <p class="hint">Sổ mã: thư mục <code>licenses/issued.json</code></p>
+      </div>
+      <div class="card">
+        <div class="toolbar" style="margin-top:0;justify-content:space-between;align-items:center">
+          <h2 style="margin:0;font-size:1.05rem">Danh sách mã</h2>
+          <div class="toolbar" style="margin:0">
+            <input id="q" placeholder="Tìm khách / ghi chú..." style="width:180px" />
+            <select id="statusFilter" style="width:auto">
+              <option value="">Tất cả</option>
+              <option value="issued">Đã tạo</option>
+              <option value="sold">Đã bán</option>
+              <option value="revoked">Thu hồi</option>
+            </select>
+            <button type="button" class="secondary" id="refreshBtn">Tải lại</button>
+            <a id="exportLink" href="/api/licenses/export.csv"><button type="button" class="secondary">Xuất CSV</button></a>
+          </div>
+        </div>
+        <div style="overflow:auto;max-height:70vh;margin-top:12px">
+          <table>
+            <thead>
+              <tr>
+                <th>Khách</th>
+                <th>Loại</th>
+                <th>Trạng thái</th>
+                <th>Mã</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const $ = s => document.querySelector(s);
+    async function api(url, opts) {
+      const r = await fetch(url, { headers: { "content-type": "application/json" }, ...opts });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || "Lỗi");
+      return data;
+    }
+    function badge(status) {
+      const cls = status === "sold" ? "ok" : status === "revoked" ? "bad" : "warn";
+      const label = status === "sold" ? "Đã bán" : status === "revoked" ? "Thu hồi" : "Đã tạo";
+      return `<span class="badge ${cls}">${label}</span>`;
+    }
+    function typeLabel(row) {
+      return row.type === "lifetime" ? "Vĩnh viễn" : `Trial ${row.days} ngày`;
+    }
+    async function load() {
+      const q = $("#q").value.trim();
+      const status = $("#statusFilter").value;
+      const qs = new URLSearchParams({ q, status });
+      $("#exportLink").href = `/api/licenses/export.csv?${qs}`;
+      const data = await api(`/api/licenses?${qs}`);
+      $("#rows").innerHTML = data.keys.map(row => `
+        <tr>
+          <td><b>${escapeHtml(row.customer || "—")}</b><div class="hint">${escapeHtml(row.note || "")}<br>${new Date(row.createdAt).toLocaleString("vi-VN")}</div></td>
+          <td>${typeLabel(row)}</td>
+          <td>${badge(row.status)}</td>
+          <td><code title="${escapeHtml(row.key)}">${escapeHtml(row.key.slice(0, 28))}…</code></td>
+          <td>
+            <div class="toolbar" style="margin:0">
+              <button type="button" class="secondary" data-copy="${escapeHtml(row.key)}">Copy</button>
+              <button type="button" class="secondary" data-status="sold" data-id="${row.id}">Đã bán</button>
+              <button type="button" class="secondary" data-status="revoked" data-id="${row.id}">Thu hồi</button>
+            </div>
+          </td>
+        </tr>
+      `).join("") || `<tr><td colspan="5">Chưa có mã.</td></tr>`;
+      $("#rows").querySelectorAll("[data-copy]").forEach(btn => btn.onclick = async () => {
+        await navigator.clipboard.writeText(btn.dataset.copy);
+        btn.textContent = "Đã copy";
+        setTimeout(() => btn.textContent = "Copy", 1200);
+      });
+      $("#rows").querySelectorAll("[data-status]").forEach(btn => btn.onclick = async () => {
+        await api(`/api/licenses/${encodeURIComponent(btn.dataset.id)}`, {
+          method: "PATCH",
+          body: JSON.stringify({ status: btn.dataset.status })
+        });
+        await load();
+      });
+    }
+    function escapeHtml(s) {
+      return String(s || "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+    }
+    $("#createBtn").onclick = async () => {
+      const msg = $("#createMsg");
+      msg.textContent = "Đang tạo…";
+      try {
+        const data = await api("/api/licenses", {
+          method: "POST",
+          body: JSON.stringify({
+            type: $("#type").value,
+            days: Number($("#days").value),
+            customer: $("#customer").value,
+            note: $("#note").value,
+            count: Number($("#count").value) || 1
+          })
+        });
+        const first = data.issued?.[0];
+        msg.textContent = first ? `Đã tạo ${data.issued.length} mã. Mã đầu đã copy.` : "Xong.";
+        if (first?.key) await navigator.clipboard.writeText(first.key).catch(() => {});
+        $("#customer").value = "";
+        await load();
+      } catch (e) {
+        msg.textContent = e.message;
+      }
+    };
+    $("#type").onchange = () => {
+      $("#days").disabled = $("#type").value === "lifetime";
+    };
+    $("#refreshBtn").onclick = () => load();
+    $("#q").oninput = () => load();
+    $("#statusFilter").onchange = () => load();
+    load().catch(e => { $("#rows").innerHTML = `<tr><td colspan="5">${escapeHtml(e.message)}</td></tr>`; });
+  </script>
+</body>
+</html>

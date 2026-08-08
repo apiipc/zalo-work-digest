@@ -22,6 +22,21 @@
   </script>
 </head>
 <body>
+  <div id="licenseGate" class="license-gate hidden" aria-live="polite">
+    <form class="card form license-card" id="licenseForm">
+      <h1>Kích hoạt Zalo Work Digest</h1>
+      <p class="sub" id="licenseGateMessage">Nhập mã kích hoạt để tiếp tục dùng app.</p>
+      <div class="license-status-box" id="licenseGateStatus"></div>
+      <label>Mã kích hoạt
+        <input id="licenseKeyInput" type="text" spellcheck="false" autocomplete="off" placeholder="ZWD1....">
+      </label>
+      <div class="toolbar">
+        <button type="submit">Kích hoạt</button>
+      </div>
+      <div id="licenseGateError" class="auth-error"></div>
+      <p class="hint">Liên hệ người bán để nhận mã dùng thử (3–5 ngày) hoặc mã vĩnh viễn.</p>
+    </form>
+  </div>
   <aside>
     <div class="brand"><span>Z</span><div>Zalo Work Digest<small>Tóm tắt công việc cá nhân</small></div></div>
     <nav>
@@ -203,6 +218,20 @@
     </section>
     <section id="settings" class="page hidden">
       <div class="settings-grid">
+        <div class="card form settings-span-full" id="licenseCard">
+          <div class="settings-card-top">
+            <h2>Bản quyền / mã kích hoạt</h2>
+          </div>
+          <p class="hint" id="licenseSettingsLabel">Đang kiểm tra…</p>
+          <p class="hint" id="licenseSettingsMessage"></p>
+          <label>Nhập mã mới (dùng thử hoặc vĩnh viễn)
+            <input id="licenseSettingsKey" type="text" spellcheck="false" autocomplete="off" placeholder="ZWD1....">
+          </label>
+          <div class="toolbar">
+            <button type="button" id="licenseSettingsActivate">Kích hoạt mã</button>
+          </div>
+          <div id="licenseSettingsNotice"></div>
+        </div>
         <div class="card form settings-span-full" id="uiScaleCard">
           <div class="settings-card-top">
             <h2>Tỉ lệ hiển thị</h2>

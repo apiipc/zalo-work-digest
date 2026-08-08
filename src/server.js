@@ -31,6 +31,7 @@ import { appMode, isSaasMode } from "./saas-mode.js";
 import { createAuth } from "./auth.js";
 import { createTenantRegistry } from "./tenant-runtime.js";
 import { encryptSecret } from "./secrets.js";
+import { activateLicenseKey, getLicenseStatus, requireLicense } from "./license.js";
 
 const saas = isSaasMode();
 let root = getAppRoot();
@@ -161,9 +162,35 @@ app.get("/api/app-mode", (_req, res) => res.json({
     aiApi: true,
     aiCli: !saas,
     aiBrain: !saas,
-    dataLocation: !saas
+    dataLocation: !saas,
+    license: true
   }
 }));
+
+app.get("/api/license", (_req, res) => {
+  res.json(getLicenseStatus());
+});
+app.post("/api/license/activate", asyncRoute(async (req, res) => {
+  try {
+    const status = await activateLicenseKey(req.body?.key || req.body?.licenseKey || "");
+    res.json(status);
+  } catch (error) {
+    res.status(error.status || 400).json({ error: error.message || "Kích hoạt thất bại" });
+  }
+}));
+
+// Khóa API khi hết hạn / chưa có quyền (trừ health, app-mode, license, auth).
+app.use("/api", (req, res, next) => {
+  const p = req.path || "";
+  if (
+    p === "/health" ||
+    p === "/app-mode" ||
+    p === "/license" ||
+    p.startsWith("/license/") ||
+    p.startsWith("/auth/")
+  ) return next();
+  return requireLicense(req, res, next);
+});
 
 if (saas) {
   app.post("/api/auth/register", asyncRoute(async (req, res) => {

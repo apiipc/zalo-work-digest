@@ -9,6 +9,8 @@ data/tenants/
 data/saas.db*
 data-saas-test/
 config/data-path.json
+config/license.json
+/licenses/
 build/bundled-cli/
 build/bundled-cliproxyapi/
 build/icon.ico

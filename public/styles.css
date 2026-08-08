@@ -753,3 +753,30 @@ body.zalo-offline #dataLocationCard input {
     transition: none !important;
   }
 }
+
+/* License gate */
+.license-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(7, 21, 33, 0.72);
+  backdrop-filter: blur(6px);
+}
+.license-gate.hidden { display: none; }
+.license-card { width: min(440px, 100%); }
+.license-card h1 { margin: 0 0 8px; font-size: 1.35rem; font-family: var(--display); }
+.license-card .sub { margin: 0 0 14px; color: var(--muted); }
+.license-status-box {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  margin-bottom: 12px;
+  font-size: 0.92rem;
+}
+.license-gate .auth-error { color: var(--danger); min-height: 1.2em; margin-top: 8px; }
+body.license-locked > aside,
+body.license-locked > main { filter: blur(2px); pointer-events: none; user-select: none; }

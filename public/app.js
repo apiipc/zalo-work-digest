@@ -50,6 +50,10 @@ async function setAiProvider(id, { refresh = true } = {}) {
 const api = async (url, options = {}) => {
   const r = await fetch(url, { headers: { "content-type": "application/json" }, credentials: "same-origin", ...options });
   const data = await r.json().catch(() => ({}));
+  if (r.status === 402 || data.code === "license_required") {
+    showLicenseGate(data.license || null);
+    throw new Error(data.error || "Cần mã kích hoạt");
+  }
   if (r.status === 401 && (data.code === "auth_required" || saasMode) && !String(url).includes("/api/auth/")) {
     location.replace("/login.html");
     throw new Error(data.error || "Cần đăng nhập");
@@ -57,6 +61,57 @@ const api = async (url, options = {}) => {
   if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
   return data;
 };
+
+function showLicenseGate(license) {
+  const gate = $("#licenseGate");
+  if (!gate) return;
+  gate.classList.remove("hidden");
+  document.body.classList.add("license-locked");
+  if (license) {
+    if ($("#licenseGateMessage")) $("#licenseGateMessage").textContent = license.message || "Cần mã kích hoạt.";
+    if ($("#licenseGateStatus")) {
+      $("#licenseGateStatus").textContent = license.label
+        ? `${license.label}${license.expiresAt ? ` · hết hạn ${new Date(license.expiresAt).toLocaleString("vi-VN")}` : ""}`
+        : "";
+    }
+  }
+}
+
+function hideLicenseGate() {
+  $("#licenseGate")?.classList.add("hidden");
+  document.body.classList.remove("license-locked");
+}
+
+async function loadLicense() {
+  const lic = await fetch("/api/license").then(r => r.json());
+  if ($("#licenseSettingsLabel")) $("#licenseSettingsLabel").textContent = lic.label || "—";
+  if ($("#licenseSettingsMessage")) $("#licenseSettingsMessage").textContent = lic.message || "";
+  return lic;
+}
+
+async function activateLicenseFromInput(inputEl, noticeEl) {
+  const key = String(inputEl?.value || "").trim();
+  if (!key) throw new Error("Nhập mã kích hoạt");
+  const r = await fetch("/api/license/activate", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ key })
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || "Kích hoạt thất bại");
+  if (noticeEl) noticeEl.textContent = data.message || "Đã kích hoạt.";
+  if (inputEl) inputEl.value = "";
+  await loadLicense().catch(() => {});
+  if (data.ok) {
+    hideLicenseGate();
+    showNotice("Đã kích hoạt bản quyền.", "success");
+    status().catch(console.error);
+    loadDashboard().catch(console.error);
+  } else {
+    showLicenseGate(data);
+  }
+  return data;
+}
 let groups = [];
 let contacts = [];
 let dailyTimes = ["08:00"];
@@ -102,7 +157,7 @@ document.querySelectorAll(".nav").forEach(btn => btn.onclick = () => {
   if (btn.dataset.page === "dashboard") loadDashboard();
   if (btn.dataset.page === "schedules") loadSchedules();
   if (btn.dataset.page === "notifications") { ensureAlertDefaults(); fillAlertFilterGroups(); loadAlerts(); loadAlertRules(); loadDigestSchedules(); }
-  if (btn.dataset.page === "settings") { loadBot(); loadAi(); if (appFeatures.dataLocation) loadDataLocation(); }
+  if (btn.dataset.page === "settings") { loadLicense().catch(console.error); loadBot(); loadAi(); if (appFeatures.dataLocation) loadDataLocation(); }
 });
 
 function clearZaloUi(message) {
@@ -1377,6 +1432,10 @@ $("#saasLogoutBtn")?.addEventListener("click", async () => {
       saasUser = me.user;
     }
     applySaasUi();
+    const lic = await fetch("/api/license").then(r => r.json());
+    if (!lic.ok) showLicenseGate(lic);
+    else hideLicenseGate();
+    await loadLicense().catch(() => {});
   } catch (e) {
     console.error(e);
   }
@@ -1385,3 +1444,24 @@ $("#saasLogoutBtn")?.addEventListener("click", async () => {
   loadDashboard().catch(console.error);
   renderDailyTimes();
 })();
+
+$("#licenseForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = $("#licenseGateError");
+  if (err) err.textContent = "";
+  try {
+    await activateLicenseFromInput($("#licenseKeyInput"), err);
+  } catch (ex) {
+    if (err) err.textContent = ex.message;
+  }
+});
+$("#licenseSettingsActivate")?.addEventListener("click", async () => {
+  const notice = $("#licenseSettingsNotice");
+  try {
+    if (notice) notice.textContent = "Đang kích hoạt…";
+    await activateLicenseFromInput($("#licenseSettingsKey"), notice);
+  } catch (ex) {
+    if (notice) notice.textContent = ex.message;
+    showNotice(ex.message, "error");
+  }
+});
