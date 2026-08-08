@@ -106,6 +106,28 @@
 
   <script>
     const $ = s => document.querySelector(s);
+    const LOCAL_KEY = "zwd_license_vault_v1";
+
+    function readLocal() {
+      try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || "[]"); }
+      catch { return []; }
+    }
+    function writeLocal(rows) {
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(rows.slice(0, 500)));
+    }
+    function upsertLocal(rows) {
+      const map = new Map(readLocal().map(r => [r.id, r]));
+      for (const r of rows) map.set(r.id, r);
+      const next = [...map.values()].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      writeLocal(next);
+      return next;
+    }
+    function patchLocal(id, status) {
+      const rows = readLocal().map(r => r.id === id ? { ...r, status, updatedAt: Date.now() } : r);
+      writeLocal(rows);
+      return rows;
+    }
+
     async function api(url, opts = {}) {
       const r = await fetch(url, { credentials: "same-origin", headers: { "content-type": "application/json" }, ...opts });
       const data = await r.json().catch(() => ({}));
@@ -132,15 +154,24 @@
     function escapeHtml(s) {
       return String(s || "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
     }
-    async function load() {
-      const qs = new URLSearchParams({ q: $("#q").value.trim(), status: $("#statusFilter").value });
-      const data = await api(`/api/licenses?${qs}`);
-      $("#rows").innerHTML = data.keys.map(row => `
+    function filterRows(rows) {
+      const q = $("#q").value.trim().toLowerCase();
+      const st = $("#statusFilter").value;
+      return rows.filter(row => {
+        if (st && row.status !== st) return false;
+        if (!q) return true;
+        const hay = [row.customer, row.note, row.key, row.id, row.type].join(" ").toLowerCase();
+        return hay.includes(q);
+      });
+    }
+    function renderRows(rows) {
+      const list = filterRows(rows);
+      $("#rows").innerHTML = list.map(row => `
         <tr>
           <td><b>${escapeHtml(row.customer || "—")}</b><div class="hint">${escapeHtml(row.note || "")}<br>${new Date(row.createdAt).toLocaleString("vi-VN")}</div></td>
           <td>${row.type === "lifetime" ? "Vĩnh viễn" : `Trial ${row.days}d`}</td>
           <td>${badge(row.status)}</td>
-          <td><code>${escapeHtml(row.key.slice(0, 24))}…</code></td>
+          <td><code>${escapeHtml(String(row.key || "").slice(0, 24))}…</code></td>
           <td>
             <div class="toolbar" style="margin:0">
               <button type="button" class="secondary" data-copy="${escapeHtml(row.key)}">Copy</button>
@@ -155,11 +186,28 @@
         setTimeout(() => btn.textContent = "Copy", 1000);
       });
       $("#rows").querySelectorAll("[data-status]").forEach(btn => btn.onclick = async () => {
-        await api(`/api/licenses/${encodeURIComponent(btn.dataset.id)}`, {
-          method: "PATCH", body: JSON.stringify({ status: btn.dataset.status })
-        });
+        try {
+          await api(`/api/licenses/${encodeURIComponent(btn.dataset.id)}`, {
+            method: "PATCH", body: JSON.stringify({ status: btn.dataset.status })
+          });
+        } catch {
+          // Không có Upstash: lưu trạng thái trên trình duyệt
+          patchLocal(btn.dataset.id, btn.dataset.status);
+        }
         await load();
       });
+    }
+    async function load() {
+      let rows = readLocal();
+      try {
+        const data = await api(`/api/licenses`);
+        if (Array.isArray(data.keys) && data.keys.length) {
+          rows = upsertLocal(data.keys);
+        }
+      } catch {
+        // giữ local
+      }
+      renderRows(rows);
     }
 
     $("#loginForm").onsubmit = async (e) => {
@@ -190,11 +238,12 @@
             count: Number($("#count").value) || 1
           })
         });
-        const first = data.issued?.[0];
+        const issued = data.issued || [];
+        if (issued.length) upsertLocal(issued);
+        const first = issued[0];
         if (first?.key) await navigator.clipboard.writeText(first.key).catch(() => {});
-        let msg = `Đã tạo ${data.issued.length} mã` + (first ? " — đã copy vào clipboard." : "");
+        let msg = `Đã tạo ${issued.length} mã — đã lưu danh sách trên trình duyệt này` + (first ? " & copy clipboard." : ".");
         if (first?.key) msg += `\n${first.key}`;
-        if (data.warning) msg += `\n${data.warning}`;
         $("#createMsg").textContent = msg;
         $("#customer").value = "";
         await load();
@@ -204,10 +253,9 @@
     };
     $("#type").onchange = () => { $("#days").disabled = $("#type").value === "lifetime"; };
     $("#refreshBtn").onclick = () => load();
-    $("#q").oninput = () => load();
-    $("#statusFilter").onchange = () => load();
+    $("#q").oninput = () => renderRows(readLocal());
+    $("#statusFilter").onchange = () => renderRows(readLocal());
 
-    // thử vào admin nếu đã có cookie
     api("/api/licenses").then(() => { showAdmin(); return load(); }).catch(() => showLogin());
   </script>
 </body>
