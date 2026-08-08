@@ -111,6 +111,8 @@ async function loadLicense() {
   if ($("#licenseSettingsLabel")) $("#licenseSettingsLabel").textContent = lic.label || "—";
   if ($("#licenseSettingsMessage")) $("#licenseSettingsMessage").textContent = lic.message || "";
   if ($("#licenseSettingsMeta")) $("#licenseSettingsMeta").innerHTML = licenseMetaHtml(lic);
+  if (!lic.ok) showLicenseGate(lic);
+  else hideLicenseGate();
   return lic;
 }
 
@@ -1465,6 +1467,7 @@ $("#saasLogoutBtn")?.addEventListener("click", async () => {
     console.error(e);
   }
   setInterval(() => status().catch(console.error), 2000);
+  setInterval(() => loadLicense().catch(console.error), 15000);
   status().catch(console.error);
   loadDashboard().catch(console.error);
   renderDailyTimes();

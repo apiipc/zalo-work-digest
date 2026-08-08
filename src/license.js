@@ -133,18 +133,34 @@ function isKeyActivated(state) {
 
 async function callLicenseServer(key) {
   const server = licenseServerUrl();
-  if (!server || !key) return { skipped: true };
-  const res = await fetch(`${server}/api/activate`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      key,
-      machineId: machineId(),
-      hostname: os.hostname()
-    })
-  });
-  const data = await res.json().catch(() => ({}));
-  return { res, data };
+  if (!server || !key) return { skipped: true, reason: !server ? "no_server" : "no_key" };
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 12000);
+  try {
+    const res = await fetch(`${server}/api/activate`, {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({
+        key,
+        machineId: machineId(),
+        hostname: os.hostname()
+      }),
+      signal: ctrl.signal
+    });
+    const text = await res.text();
+    let data = {};
+    try { data = text ? JSON.parse(text) : {}; } catch { data = { raw: text.slice(0, 200) }; }
+    return { res, data, status: res.status };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function isDeniedLicenseResponse(status, data = {}) {
+  if ([401, 403, 404].includes(Number(status))) return true;
+  if (["revoked", "device_limit", "not_registered", "deleted"].includes(data.code)) return true;
+  if (data.ok === false && data.registered === false) return true;
+  return false;
 }
 
 export async function activateLicenseKey(raw, { configDir = getConfigDir() } = {}) {
@@ -157,18 +173,18 @@ export async function activateLicenseKey(raw, { configDir = getConfigDir() } = {
   let idFromServer = null;
 
   if (server) {
-    const { res, data } = await callLicenseServer(key);
-    if (
-      res.status === 403 ||
-      res.status === 404 ||
-      ["revoked", "device_limit", "not_registered"].includes(data.code)
-    ) {
+    const result = await callLicenseServer(key);
+    if (result.skipped) {
+      throw Object.assign(new Error("Thiếu máy chủ license"), { status: 503 });
+    }
+    const { res, data, status } = result;
+    if (isDeniedLicenseResponse(status, data)) {
       throw Object.assign(new Error(data.error || "Không kích hoạt được mã"), { status: 403, code: data.code });
     }
-    if (!res.ok && res.status !== 503) {
-      throw Object.assign(new Error(data.error || `Máy chủ license lỗi (${res.status})`), { status: res.status || 500 });
+    if (!res.ok && status !== 503) {
+      throw Object.assign(new Error(data.error || `Máy chủ license lỗi (${status})`), { status: status || 500 });
     }
-    if (res.status === 503) {
+    if (status === 503) {
       throw Object.assign(new Error(data.error || "Máy chủ license chưa sẵn sàng (thiếu Upstash)"), { status: 503 });
     }
     typeFromServer = data.type || null;
@@ -281,7 +297,8 @@ function statusFromState(state) {
   };
 }
 
-const SERVER_CHECK_MS = 30 * 1000;
+﻿const SERVER_CHECK_MS = 15 * 1000;
+const OFFLINE_GRACE_MS = 10 * 60 * 1000;
 
 function wipeLicense(configDir = getConfigDir()) {
   try { fs.unlinkSync(licensePath(configDir)); } catch {}
@@ -304,7 +321,6 @@ function blockedStatus(message) {
 /** Đồng bộ với server (thu hồi / xóa / đổi máy). */
 export async function syncLicenseWithServer({ configDir = getConfigDir(), force = false } = {}) {
   let state = readState(configDir);
-  // Bản cũ từng tự cấp free-trial → vô hiệu, bắt nhập mã.
   if (state?.source === "free-trial" || (state?.activatedAt && !state.fullKey)) {
     wipeLicense(configDir);
     state = null;
@@ -313,7 +329,10 @@ export async function syncLicenseWithServer({ configDir = getConfigDir(), force 
     return statusFromState(null);
   }
   const server = licenseServerUrl();
-  if (!server) return statusFromState(state);
+  if (!server) {
+    wipeLicense(configDir);
+    return blockedStatus("Thiếu LICENSE_SERVER_URL — không kiểm tra được mã.");
+  }
 
   const last = Number(state.lastServerCheckAt) || 0;
   if (!force && !state.serverBlocked && Date.now() - last < SERVER_CHECK_MS) {
@@ -321,46 +340,54 @@ export async function syncLicenseWithServer({ configDir = getConfigDir(), force 
   }
 
   try {
-    const { res, data } = await callLicenseServer(state.fullKey);
-    if (
-      res.status === 403 ||
-      res.status === 404 ||
-      ["revoked", "device_limit", "not_registered"].includes(data.code)
-    ) {
+    const result = await callLicenseServer(state.fullKey);
+    if (result.skipped) {
+      wipeLicense(configDir);
+      return blockedStatus("Không gọi được máy chủ license.");
+    }
+    const { res, data, status } = result;
+    state.lastServerStatus = status;
+    state.lastServerCheckAt = Date.now();
+
+    if (isDeniedLicenseResponse(status, data)) {
       wipeLicense(configDir);
       return blockedStatus(data.error || "Mã đã bị xóa / thu hồi trên hệ thống.");
     }
-    if (res.ok) {
+    if (res.ok && data.ok !== false) {
       state.serverBlocked = false;
       state.serverMessage = "";
-      state.lastServerCheckAt = Date.now();
       writeState(state, configDir);
       return statusFromState(state);
     }
-    // 503 thiếu Redis trên server → không cho dùng (tránh lách khi xóa mã)
-    if (res.status === 503) {
-      wipeLicense(configDir);
-      return blockedStatus(data.error || "Máy chủ license không sẵn sàng.");
+    if (status === 503 || status >= 500) {
+      writeState(state, configDir);
+      if (last && Date.now() - last > OFFLINE_GRACE_MS) {
+        wipeLicense(configDir);
+        return blockedStatus("Máy chủ license lỗi quá lâu. Thử lại sau hoặc nhập mã mới.");
+      }
+      return statusFromState(state);
     }
+    wipeLicense(configDir);
+    return blockedStatus(data.error || `Mã không hợp lệ (HTTP ${status}).`);
   } catch (error) {
     console.warn("syncLicenseWithServer:", error.message);
-    // Mất mạng tạm: cho dùng tối đa 2 giờ kể từ lần check OK gần nhất
-    const graceMs = 2 * 60 * 60 * 1000;
-    if (last && Date.now() - last > graceMs) {
+    const lastOk = Number(state.lastServerCheckAt) || 0;
+    if (!lastOk || Date.now() - lastOk > OFFLINE_GRACE_MS) {
       wipeLicense(configDir);
-      return blockedStatus("Không kiểm tra được mã với máy chủ quá lâu. Kiểm tra mạng rồi kích hoạt lại.");
+      return blockedStatus("Không kết nối được máy chủ license. Kiểm tra mạng rồi kích hoạt lại.");
     }
   }
   return statusFromState(readState(configDir));
 }
 
-export async function getLicenseStatus(configDir = getConfigDir(), { force = false } = {}) {
-  return syncLicenseWithServer({ configDir, force });
+export async function getLicenseStatus(configDir = getConfigDir(), opts = {}) {
+  const force = Boolean(opts && opts.force);
+  return syncLicenseWithServer({ configDir: configDir || getConfigDir(), force });
 }
 
 export async function requireLicense(req, res, next) {
   try {
-    const status = await getLicenseStatus();
+    const status = await getLicenseStatus(getConfigDir(), { force: false });
     if (status.ok) return next();
     res.status(402).json({
       error: status.message || "Cần mã kích hoạt",

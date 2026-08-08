@@ -31,7 +31,7 @@ import { appMode, isSaasMode } from "./saas-mode.js";
 import { createAuth } from "./auth.js";
 import { createTenantRegistry } from "./tenant-runtime.js";
 import { encryptSecret } from "./secrets.js";
-import { activateLicenseKey, getLicenseStatus, requireLicense } from "./license.js";
+import { activateLicenseKey, getLicenseStatus } from "./license.js";
 
 const saas = isSaasMode();
 let root = getAppRoot();
@@ -179,8 +179,24 @@ app.post("/api/license/activate", asyncRoute(async (req, res) => {
   }
 }));
 
+async function enforceLicenseOrLock() {
+  const status = await getLicenseStatus(undefined, { force: true });
+  if (status.ok) return status;
+  try {
+    if (saas) {
+      // multi-tenant: skip global zalo logout
+    } else if (zalo?.snapshot()?.status === "online" || zalo?.snapshot()?.status === "qr") {
+      zalo.logout();
+      console.warn("License invalid — đã đăng xuất Zalo.");
+    }
+  } catch (error) {
+    console.warn("license lock logout:", error.message);
+  }
+  return status;
+}
+
 // Khóa API khi hết hạn / chưa có quyền (trừ health, app-mode, license, auth).
-app.use("/api", (req, res, next) => {
+app.use("/api", asyncRoute(async (req, res, next) => {
   const p = req.path || "";
   if (
     p === "/health" ||
@@ -189,8 +205,17 @@ app.use("/api", (req, res, next) => {
     p.startsWith("/license/") ||
     p.startsWith("/auth/")
   ) return next();
-  return requireLicense(req, res, next);
-});
+  const status = await getLicenseStatus(undefined, { force: false });
+  if (status.ok) return next();
+  try {
+    if (!saas && zalo) zalo.logout();
+  } catch {}
+  return res.status(402).json({
+    error: status.message || "Cần mã kích hoạt",
+    code: "license_required",
+    license: status
+  });
+}));
 
 if (saas) {
   app.post("/api/auth/register", asyncRoute(async (req, res) => {
@@ -985,6 +1010,8 @@ async function runDigestSchedulerFor(c) {
 }
 
 async function runScheduler() {
+  const lic = await getLicenseStatus(undefined, { force: false });
+  if (!lic.ok) return;
   if (saas) {
     for (const rt of tenants.listRuntimes()) {
       const c = {
@@ -1001,6 +1028,8 @@ async function runScheduler() {
 }
 
 async function runDigestScheduler() {
+  const lic = await getLicenseStatus(undefined, { force: false });
+  if (!lic.ok) return;
   if (saas) {
     for (const rt of tenants.listRuntimes()) {
       const c = {
@@ -1018,6 +1047,9 @@ async function runDigestScheduler() {
 
 setInterval(runScheduler, 5000).unref();
 setInterval(runDigestScheduler, 30000).unref();
+setInterval(() => {
+  enforceLicenseOrLock().catch(err => console.warn("license watchdog:", err.message));
+}, 15000).unref();
 
 app.use(express.static(path.join(root, "public")));
 
