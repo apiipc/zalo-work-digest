@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" fill="none">
+  <rect width="1200" height="760" rx="24" fill="#F6F9FF" stroke="#D7E2FF"/>
+  <rect x="40" y="40" width="260" height="680" rx="16" fill="#0A2A43"/>
+  <text x="80" y="98" fill="#EAF4FF" font-family="Arial" font-size="20" font-weight="700">Zalo Work Digest</text>
+  <text x="80" y="185" fill="#EAF4FF" font-family="Arial" font-size="16">Nhom theo doi</text>
+
+  <rect x="335" y="46" width="825" height="110" rx="18" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="372" y="92" fill="#173E7A" font-family="Arial" font-size="24" font-weight="700">Nhom theo doi</text>
+  <text x="372" y="118" fill="#607182" font-family="Arial" font-size="16">Bat tat nhom can luu tin nhan moi.</text>
+
+  <rect x="335" y="170" width="825" height="520" rx="18" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <rect x="380" y="220" width="720" height="60" rx="14" fill="#F7FAFF" stroke="#D7E2FF"/>
+  <rect x="392" y="233" width="46" height="46" rx="12" fill="#D9EBFF"/>
+  <text x="455" y="255" fill="#173E7A" font-family="Arial" font-size="16" font-weight="700">Project A</text>
+  <text x="455" y="275" fill="#607182" font-family="Arial" font-size="13">25 thanh vien - ID 12345</text>
+  <rect x="1010" y="238" width="22" height="22" rx="6" fill="#2F6DFF"/>
+
+  <rect x="380" y="300" width="720" height="60" rx="14" fill="#F7FAFF" stroke="#D7E2FF"/>
+  <rect x="392" y="313" width="46" height="46" rx="12" fill="#D9EBFF"/>
+  <text x="455" y="335" fill="#173E7A" font-family="Arial" font-size="16" font-weight="700">Team Dev</text>
+  <text x="455" y="355" fill="#607182" font-family="Arial" font-size="13">12 thanh vien - ID 98765</text>
+  <rect x="1010" y="318" width="22" height="22" rx="6" fill="#D5E0EA"/>
+</svg>

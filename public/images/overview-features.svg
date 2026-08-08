@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" fill="none">
+  <rect width="1200" height="900" rx="24" fill="#F7FAFF"/>
+  <text x="50" y="70" fill="#173E7A" font-family="Arial, sans-serif" font-size="34" font-weight="700">Danh muc tinh nang chi tiet</text>
+
+  <rect x="50" y="110" width="520" height="220" rx="16" fill="#FFFFFF" stroke="#D6E4FF"/>
+  <text x="80" y="155" fill="#234F93" font-family="Arial, sans-serif" font-size="26" font-weight="700">Theo doi va tong hop Zalo</text>
+  <text x="80" y="195" fill="#355D98" font-family="Arial, sans-serif" font-size="20">- Dong bo danh sach nhom va thanh vien</text>
+  <text x="80" y="225" fill="#355D98" font-family="Arial, sans-serif" font-size="20">- Luu tin nhan moi theo nhom duoc bat</text>
+  <text x="80" y="255" fill="#355D98" font-family="Arial, sans-serif" font-size="20">- Tao digest theo 8h/24h/3 ngay</text>
+  <text x="80" y="285" fill="#355D98" font-family="Arial, sans-serif" font-size="20">- Xuat CSV va CSV day du (kem tep/anh)</text>
+
+  <rect x="630" y="110" width="520" height="220" rx="16" fill="#FFFFFF" stroke="#D6E4FF"/>
+  <text x="660" y="155" fill="#1F7A44" font-family="Arial, sans-serif" font-size="26" font-weight="700">AI cho bao cao</text>
+  <text x="660" y="195" fill="#2F7E4F" font-family="Arial, sans-serif" font-size="20">- Ho tro OpenAI, Gemini, DeepSeek, GLM, Claude</text>
+  <text x="660" y="225" fill="#2F7E4F" font-family="Arial, sans-serif" font-size="20">- Ho tro CLI: Codex / Claude / Gemini</text>
+  <text x="660" y="255" fill="#2F7E4F" font-family="Arial, sans-serif" font-size="20">- Tu dong cai dat CLI qua npm</text>
+  <text x="660" y="285" fill="#2F7E4F" font-family="Arial, sans-serif" font-size="20">- Kiem tra tuong thich va cap nhat CLI</text>
+
+  <rect x="50" y="360" width="520" height="220" rx="16" fill="#FFFFFF" stroke="#D6E4FF"/>
+  <text x="80" y="405" fill="#A15E18" font-family="Arial, sans-serif" font-size="26" font-weight="700">Thong bao qua Zalo Bot</text>
+  <text x="80" y="445" fill="#A37333" font-family="Arial, sans-serif" font-size="20">- Luu bot token va chat id</text>
+  <text x="80" y="475" fill="#A37333" font-family="Arial, sans-serif" font-size="20">- Kiem tra token va gui thu thong bao</text>
+  <text x="80" y="505" fill="#A37333" font-family="Arial, sans-serif" font-size="20">- Tu tim chat id bang tin nhan moi</text>
+  <text x="80" y="535" fill="#A37333" font-family="Arial, sans-serif" font-size="20">- Gui tong hop theo lich trong ngay</text>
+
+  <rect x="630" y="360" width="520" height="220" rx="16" fill="#FFFFFF" stroke="#D6E4FF"/>
+  <text x="660" y="405" fill="#5A47B8" font-family="Arial, sans-serif" font-size="26" font-weight="700">Giao viec va hen gio</text>
+  <text x="660" y="445" fill="#6857C5" font-family="Arial, sans-serif" font-size="20">- Gui theo nhom hoac theo ca nhan</text>
+  <text x="660" y="475" fill="#6857C5" font-family="Arial, sans-serif" font-size="20">- Ho tro tag nhieu thanh vien</text>
+  <text x="660" y="505" fill="#6857C5" font-family="Arial, sans-serif" font-size="20">- Lich 1 lan hoac lap hang ngay</text>
+  <text x="660" y="535" fill="#6857C5" font-family="Arial, sans-serif" font-size="20">- Co xac nhan 2 lan khi xoa lich</text>
+
+  <rect x="50" y="610" width="1100" height="220" rx="16" fill="#EEF5FF" stroke="#BDD3FF"/>
+  <text x="80" y="655" fill="#1F467F" font-family="Arial, sans-serif" font-size="26" font-weight="700">Bao mat va van hanh</text>
+  <text x="80" y="695" fill="#355A8B" font-family="Arial, sans-serif" font-size="20">- Chay local-first: app web + API tren may ca nhan</text>
+  <text x="80" y="725" fill="#355A8B" font-family="Arial, sans-serif" font-size="20">- Gate theo trang thai Zalo: offline thi khoa tinh nang de tranh goi sai</text>
+  <text x="80" y="755" fill="#355A8B" font-family="Arial, sans-serif" font-size="20">- Dang xuat khong xoa cau hinh da luu (AI/Bot van con)</text>
+  <text x="80" y="785" fill="#355A8B" font-family="Arial, sans-serif" font-size="20">- Toan bo du lieu: SQLite + session file tai thu muc du an</text>
+</svg>

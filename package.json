@@ -1,0 +1,128 @@
+{
+  "name": "zalo-work-digest",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Zalo Work Digest — theo dõi nhóm Zalo, báo cáo, Bot và AI trên máy local",
+  "author": "Zalo Work Digest",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "start:saas": "node scripts/start-saas.js",
+    "dev:saas": "node --watch scripts/start-saas.js",
+    "test": "node --test",
+    "check": "node --check src/server.js && node --check src/zalo-adapter.js && node --check src/ai-cli.js && node --check src/summarizer.js && node --check src/auth.js && node --check src/tenant-runtime.js",
+    "branding": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-branding.ps1",
+    "vendor:cli": "node scripts/vendor-cli.js",
+    "vendor:cliproxyapi": "node scripts/vendor-cliproxyapi.js",
+    "electron:dev": "electron .",
+    "dist:win": "npm run branding && npm run vendor:cli && npm run vendor:cliproxyapi && electron-builder --win nsis",
+    "dist:mac": "npm run vendor:cli && npm run vendor:cliproxyapi && electron-builder --mac dmg --arm64",
+    "dist:mac:arm64": "npm run dist:mac"
+  },
+  "dependencies": {
+    "express": "5.1.0",
+    "zca-js": "2.1.2"
+  },
+  "devDependencies": {
+    "electron": "^37.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "local.zalo.work.digest",
+    "productName": "Zalo Work Digest",
+    "copyright": "Copyright © Zalo Work Digest",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "public/**/*",
+      "package.json",
+      "node_modules/**/*",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/.cache"
+    ],
+    "extraResources": [
+      {
+        "from": "build/bundled-cli/package.json",
+        "to": "cli/package.json"
+      },
+      {
+        "from": "build/bundled-cli/node_modules",
+        "to": "cli/node_modules"
+      },
+      {
+        "from": "build/bundled-cliproxyapi",
+        "to": "cliproxyapi",
+        "filter": ["**/*", "!**/*.zip"]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "ZaloWorkDigest-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Zalo Work Digest",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeader": "build/installerHeader.bmp",
+      "installerSidebar": "build/installerSidebar.bmp",
+      "uninstallerSidebar": "build/installerSidebar.bmp",
+      "license": null,
+      "deleteAppDataOnUninstall": false
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "artifactName": "ZaloWorkDigest-${version}-mac-arm64.${ext}",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "identity": null
+    },
+    "dmg": {
+      "title": "Zalo Work Digest",
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "asar": true
+  },
+  "allowScripts": {
+    "electron@37.10.3": true,
+    "electron-winstaller@5.4.0": true
+  }
+}

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" fill="none">
+  <rect width="1200" height="760" rx="24" fill="#F6F9FF" stroke="#D7E2FF"/>
+  <rect x="40" y="40" width="260" height="680" rx="16" fill="#0A2A43"/>
+  <text x="80" y="98" fill="#EAF4FF" font-family="Arial" font-size="20" font-weight="700">Zalo Work Digest</text>
+  <text x="80" y="150" fill="#CFE7FF" font-family="Arial" font-size="15">Tong quan</text>
+
+  <rect x="335" y="46" width="825" height="110" rx="18" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="372" y="92" fill="#173E7A" font-family="Arial" font-size="24" font-weight="700">Tong quan</text>
+  <text x="372" y="118" fill="#607182" font-family="Arial" font-size="16">Du lieu Zalo duoc luu tren may nay</text>
+  <rect x="1010" y="73" width="120" height="48" rx="12" fill="#2F6DFF"/>
+  <text x="1030" y="103" fill="#fff" font-family="Arial" font-size="14" font-weight="700">Dong bo</text>
+
+  <rect x="335" y="170" width="260" height="150" rx="16" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="400" y="230" fill="#1A86FF" font-family="Arial" font-size="44" font-weight="800">5</text>
+  <text x="373" y="280" fill="#607182" font-family="Arial" font-size="16">Nhom dang theo doi</text>
+
+  <rect x="610" y="170" width="260" height="150" rx="16" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="675" y="230" fill="#1A86FF" font-family="Arial" font-size="44" font-weight="800">18</text>
+  <text x="635" y="280" fill="#607182" font-family="Arial" font-size="16">Tin nhan hom nay</text>
+
+  <rect x="885" y="170" width="275" height="150" rx="16" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="950" y="230" fill="#1A86FF" font-family="Arial" font-size="44" font-weight="800">3</text>
+  <text x="920" y="280" fill="#607182" font-family="Arial" font-size="16">Lich gui gan day</text>
+
+  <rect x="335" y="340" width="825" height="350" rx="18" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="372" y="390" fill="#1F4DA3" font-family="Arial" font-size="20" font-weight="700">Bat dau nhanh</text>
+  <text x="372" y="420" fill="#607182" font-family="Arial" font-size="16">1) Ket noi Zalo bang QR.</text>
+  <text x="372" y="450" fill="#607182" font-family="Arial" font-size="16">2) Chon nhom can theo doi.</text>
+  <text x="372" y="480" fill="#607182" font-family="Arial" font-size="16">3) De ung dung chay nen.</text>
+</svg>

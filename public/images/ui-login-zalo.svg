@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" fill="none">
+  <rect x="0" y="0" width="1200" height="760" rx="24" fill="#0B1220"/>
+  <rect x="28" y="28" width="1144" height="704" rx="18" fill="#F6F9FF" stroke="#D7E2FF"/>
+  <rect x="52" y="52" width="260" height="656" rx="16" fill="#0A2A43"/>
+  <text x="86" y="104" fill="#EAF4FF" font-family="Arial" font-size="22" font-weight="700">Zalo Work Digest</text>
+  <text x="86" y="170" fill="#CFE7FF" font-family="Arial" font-size="16">Tong quan</text>
+  <text x="86" y="220" fill="#AFCBE4" font-family="Arial" font-size="16">Nhom theo doi</text>
+  <text x="86" y="270" fill="#AFCBE4" font-family="Arial" font-size="16">Bao cao</text>
+  <text x="86" y="320" fill="#AFCBE4" font-family="Arial" font-size="16">Thong bao</text>
+  <text x="86" y="370" fill="#AFCBE4" font-family="Arial" font-size="16">Giao viec va hen gio</text>
+  <text x="86" y="420" fill="#AFCBE4" font-family="Arial" font-size="16">Cai dat</text>
+
+  <rect x="336" y="64" width="812" height="120" rx="18" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="370" y="108" fill="#173E7A" font-family="Arial" font-size="22" font-weight="700">Ket noi Zalo ca nhan</text>
+  <text x="370" y="138" fill="#607182" font-family="Arial" font-size="16">Quet QR bang tai khoan dang dung tren dien thoai.</text>
+
+  <rect x="336" y="206" width="812" height="488" rx="18" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <rect x="380" y="250" width="240" height="280" rx="16" fill="#FFFFFF" stroke="#B9D4F3"/>
+  <rect x="402" y="272" width="196" height="196" rx="12" fill="#DDEBFF"/>
+  <text x="488" y="378" fill="#1F4DA3" font-family="Arial" font-size="26" font-weight="700">QR</text>
+  <rect x="412" y="510" width="176" height="46" rx="14" fill="#2F6DFF"/>
+  <text x="448" y="538" fill="#fff" font-family="Arial" font-size="16" font-weight="700">Tao ma QR</text>
+
+  <rect x="660" y="250" width="430" height="140" rx="16" fill="#EEF4FF" stroke="#BDD3FF"/>
+  <text x="690" y="300" fill="#1F4DA3" font-family="Arial" font-size="18" font-weight="700">Gate offline</text>
+  <text x="690" y="328" fill="#2F5087" font-family="Arial" font-size="15">Khi offline: khoa tinh nang AI Bot.</text>
+  <text x="690" y="352" fill="#2F5087" font-family="Arial" font-size="15">Cau hinh da luu van duoc giu.</text>
+</svg>

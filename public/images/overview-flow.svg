@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" fill="none">
+  <rect width="1200" height="760" rx="24" fill="#F8FAFF"/>
+  <text x="48" y="70" fill="#163A70" font-family="Arial, sans-serif" font-size="34" font-weight="700">Quy trinh su dung nhanh</text>
+
+  <rect x="60" y="120" width="240" height="140" rx="16" fill="#EAF2FF" stroke="#76A4FF"/>
+  <text x="82" y="165" fill="#1F4D93" font-family="Arial, sans-serif" font-size="48" font-weight="700">1</text>
+  <text x="130" y="170" fill="#1F4D93" font-family="Arial, sans-serif" font-size="24" font-weight="700">Dang nhap QR</text>
+  <text x="82" y="205" fill="#355D9E" font-family="Arial, sans-serif" font-size="18">Ket noi tai khoan Zalo</text>
+  <text x="82" y="230" fill="#355D9E" font-family="Arial, sans-serif" font-size="18">ca nhan tren may nay</text>
+
+  <rect x="340" y="120" width="240" height="140" rx="16" fill="#E9FBEF" stroke="#59BA7D"/>
+  <text x="362" y="165" fill="#1E7F45" font-family="Arial, sans-serif" font-size="48" font-weight="700">2</text>
+  <text x="410" y="170" fill="#1E7F45" font-family="Arial, sans-serif" font-size="24" font-weight="700">Dong bo nhom</text>
+  <text x="362" y="205" fill="#2E7A4F" font-family="Arial, sans-serif" font-size="18">Chon nhom can theo doi</text>
+  <text x="362" y="230" fill="#2E7A4F" font-family="Arial, sans-serif" font-size="18">va bat/tat de luu tin</text>
+
+  <rect x="620" y="120" width="240" height="140" rx="16" fill="#FFF7EA" stroke="#E8AA57"/>
+  <text x="642" y="165" fill="#9B641C" font-family="Arial, sans-serif" font-size="48" font-weight="700">3</text>
+  <text x="690" y="170" fill="#9B641C" font-family="Arial, sans-serif" font-size="24" font-weight="700">Cau hinh AI</text>
+  <text x="642" y="205" fill="#A27431" font-family="Arial, sans-serif" font-size="18">API key hoac dang nhap</text>
+  <text x="642" y="230" fill="#A27431" font-family="Arial, sans-serif" font-size="18">CLI va test ket noi</text>
+
+  <rect x="900" y="120" width="240" height="140" rx="16" fill="#F1EEFF" stroke="#8B72FF"/>
+  <text x="922" y="165" fill="#5C47BF" font-family="Arial, sans-serif" font-size="48" font-weight="700">4</text>
+  <text x="970" y="170" fill="#5C47BF" font-family="Arial, sans-serif" font-size="24" font-weight="700">Bot / Lich</text>
+  <text x="922" y="205" fill="#6A57C8" font-family="Arial, sans-serif" font-size="18">Luu token + chat id</text>
+  <text x="922" y="230" fill="#6A57C8" font-family="Arial, sans-serif" font-size="18">gui thong bao tu dong</text>
+
+  <rect x="160" y="360" width="880" height="300" rx="18" fill="#FFFFFF" stroke="#D8E3FA"/>
+  <text x="190" y="410" fill="#1D3F76" font-family="Arial, sans-serif" font-size="28" font-weight="700">Diem quan trong</text>
+  <circle cx="210" cy="455" r="8" fill="#3E7BFF"/>
+  <text x="230" y="463" fill="#355785" font-family="Arial, sans-serif" font-size="22">Dang xuat chi ngat Zalo session, khong xoa cau hinh AI/Bot.</text>
+  <circle cx="210" cy="505" r="8" fill="#3E7BFF"/>
+  <text x="230" y="513" fill="#355785" font-family="Arial, sans-serif" font-size="22">Dang nhap lai QR la dung tiep ngay, khong can nhap lai token/chat id.</text>
+  <circle cx="210" cy="555" r="8" fill="#3E7BFF"/>
+  <text x="230" y="563" fill="#355785" font-family="Arial, sans-serif" font-size="22">Co nut kiem tra tuong thich CLI va cap nhat CLI tu dong.</text>
+  <circle cx="210" cy="605" r="8" fill="#3E7BFF"/>
+  <text x="230" y="613" fill="#355785" font-family="Arial, sans-serif" font-size="22">He thong khoa tinh nang khi offline de tranh loi va nham lan.</text>
+
+  <path d="M300 190H330" stroke="#4F87FF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M580 190H610" stroke="#4F87FF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M860 190H890" stroke="#4F87FF" stroke-width="4" stroke-linecap="round"/>
+</svg>

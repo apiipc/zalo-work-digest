@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" fill="none">
+  <rect width="1200" height="620" rx="24" fill="#F5F9FF"/>
+  <rect x="40" y="60" width="280" height="140" rx="16" fill="#EAF2FF" stroke="#7AA2FF"/>
+  <text x="60" y="95" fill="#173A7A" font-family="Arial, sans-serif" font-size="22" font-weight="700">Nguoi dung</text>
+  <text x="60" y="130" fill="#244B93" font-family="Arial, sans-serif" font-size="18">Dashboard Web local</text>
+  <text x="60" y="160" fill="#244B93" font-family="Arial, sans-serif" font-size="18">127.0.0.1:4782</text>
+
+  <rect x="460" y="40" width="300" height="180" rx="16" fill="#E9FBEF" stroke="#54B879"/>
+  <text x="480" y="80" fill="#1B7D44" font-family="Arial, sans-serif" font-size="22" font-weight="700">Node.js / Express</text>
+  <text x="480" y="115" fill="#256F45" font-family="Arial, sans-serif" font-size="18">API + Scheduler + Gate</text>
+  <text x="480" y="145" fill="#256F45" font-family="Arial, sans-serif" font-size="18">Khoa tinh nang khi offline</text>
+  <text x="480" y="175" fill="#256F45" font-family="Arial, sans-serif" font-size="18">Mo lai khi QR online</text>
+
+  <rect x="860" y="60" width="300" height="140" rx="16" fill="#FFF5E9" stroke="#F0A14A"/>
+  <text x="880" y="95" fill="#9A5A10" font-family="Arial, sans-serif" font-size="22" font-weight="700">Zalo ca nhan</text>
+  <text x="880" y="130" fill="#A76A20" font-family="Arial, sans-serif" font-size="18">Dang nhap bang QR</text>
+  <text x="880" y="160" fill="#A76A20" font-family="Arial, sans-serif" font-size="18">Dong bo nhom / tin nhan</text>
+
+  <rect x="460" y="280" width="300" height="140" rx="16" fill="#F0EEFF" stroke="#846BFF"/>
+  <text x="480" y="315" fill="#553FB5" font-family="Arial, sans-serif" font-size="22" font-weight="700">SQLite + Session</text>
+  <text x="480" y="350" fill="#5F4AC7" font-family="Arial, sans-serif" font-size="18">Luu toan bo cau hinh local</text>
+  <text x="480" y="380" fill="#5F4AC7" font-family="Arial, sans-serif" font-size="18">Bot token / chat id / AI</text>
+
+  <rect x="860" y="280" width="300" height="140" rx="16" fill="#E9FAFE" stroke="#2CA6C8"/>
+  <text x="880" y="315" fill="#136A82" font-family="Arial, sans-serif" font-size="22" font-weight="700">AI Provider</text>
+  <text x="880" y="350" fill="#1C738A" font-family="Arial, sans-serif" font-size="18">API key hoac CLI dang nhap</text>
+  <text x="880" y="380" fill="#1C738A" font-family="Arial, sans-serif" font-size="18">Codex / Claude / Gemini</text>
+
+  <rect x="40" y="280" width="280" height="140" rx="16" fill="#FFF0F0" stroke="#DE6D6D"/>
+  <text x="60" y="315" fill="#9F3030" font-family="Arial, sans-serif" font-size="22" font-weight="700">Zalo Bot</text>
+  <text x="60" y="350" fill="#AC3B3B" font-family="Arial, sans-serif" font-size="18">Gui thong bao / tong hop</text>
+  <text x="60" y="380" fill="#AC3B3B" font-family="Arial, sans-serif" font-size="18">Theo lich hen gio</text>
+
+  <path d="M320 130H450" stroke="#3C78FF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M760 130H850" stroke="#3C78FF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M610 220V270" stroke="#3C78FF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M460 350H330" stroke="#3C78FF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M760 350H850" stroke="#3C78FF" stroke-width="4" stroke-linecap="round"/>
+
+  <text x="40" y="520" fill="#284066" font-family="Arial, sans-serif" font-size="26" font-weight="700">Kien truc tong quan</text>
+  <text x="40" y="555" fill="#3B557D" font-family="Arial, sans-serif" font-size="20">Tat ca du lieu luu tren may cua ban. Dang xuat Zalo chi ngat session, khong xoa cau hinh AI/Bot.</text>
+</svg>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Đăng ký — Zalo Work Digest</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .auth-wrap { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+    .auth-card { width: min(420px, 100%); }
+    .auth-card h1 { margin: 0 0 8px; font-size: 1.5rem; }
+    .auth-card .sub { margin: 0 0 20px; opacity: .75; }
+    .auth-card label { display: block; margin: 12px 0; }
+    .auth-card input { width: 100%; }
+    .auth-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    .auth-error { color: #c0392b; margin-top: 12px; min-height: 1.2em; }
+    .auth-note { font-size: .85rem; opacity: .8; margin-top: 14px; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div class="auth-wrap">
+    <form class="card form auth-card" id="registerForm">
+      <h1>Tạo tài khoản</h1>
+      <p class="sub">Mỗi tài khoản có Zalo và cấu hình AI riêng trên web.</p>
+      <label>Tên hiển thị<input id="name" type="text" autocomplete="name" maxlength="80" /></label>
+      <label>Email<input id="email" type="email" required autocomplete="username" /></label>
+      <label>Mật khẩu (tối thiểu 8 ký tự)<input id="password" type="password" required autocomplete="new-password" minlength="8" /></label>
+      <div class="auth-actions">
+        <button type="submit">Đăng ký</button>
+        <a class="secondary" href="/login.html" style="display:inline-flex;align-items:center;text-decoration:none;padding:8px 14px;border-radius:8px">Đã có tài khoản</a>
+      </div>
+      <div class="auth-error" id="error"></div>
+      <p class="auth-note">Lưu ý: kết nối Zalo trên server dùng phiên không chính thức — có rủi ro theo điều khoản Zalo. Chỉ dùng tài khoản bạn được phép quản lý.</p>
+    </form>
+  </div>
+  <script type="module">
+    const mode = await fetch("/api/app-mode").then(r => r.json()).catch(() => ({ saas: false }));
+    if (!mode.saas) location.replace("/");
+    const me = await fetch("/api/auth/me").then(r => r.ok ? r.json() : null).catch(() => null);
+    if (me?.user) location.replace("/");
+
+    document.getElementById("registerForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const error = document.getElementById("error");
+      error.textContent = "";
+      try {
+        const r = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value
+          })
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || "Đăng ký thất bại");
+        location.replace("/");
+      } catch (err) {
+        error.textContent = err.message;
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" fill="none">
+  <rect width="1200" height="820" rx="24" fill="#F6F9FF" stroke="#D7E2FF"/>
+  <rect x="40" y="40" width="260" height="740" rx="16" fill="#0A2A43"/>
+  <text x="80" y="98" fill="#EAF4FF" font-family="Arial" font-size="20" font-weight="700">Zalo Work Digest</text>
+  <text x="80" y="185" fill="#EAF4FF" font-family="Arial" font-size="16">Cài ·t</text>
+
+  <rect x="335" y="46" width="825" height="110" rx="18" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="372" y="92" fill="#173E7A" font-family="Arial" font-size="24" font-weight="700">Cài ·t AI và Zalo Bot</text>
+
+  <rect x="335" y="170" width="825" height="300" rx="18" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="372" y="220" fill="#1F4DA3" font-family="Arial" font-size="18" font-weight="700">K¿t nÑi AI Ã tóm t¯t</text>
+  <rect x="372" y="240" width="420" height="46" rx="12" fill="#EEF4FF" stroke="#D7E2FF"/>
+  <text x="392" y="269" fill="#1F4DA3" font-family="Arial" font-size="14">B­t AI</text>
+
+  <text x="372" y="312" fill="#607182" font-family="Arial" font-size="14">Nhà cung c¥p</text>
+  <rect x="372" y="328" width="760" height="46" rx="12" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="392" y="357" fill="#122033" font-family="Arial" font-size="14">CLI (Codex / Claude / Gemini) ho·c API key</text>
+
+  <rect x="372" y="390" width="760" height="78" rx="14" fill="#F7FAFF" stroke="#D7E2FF"/>
+  <text x="398" y="420" fill="#607182" font-family="Arial" font-size="14">Tr¡ng thái CLI: ã cài / ã ng nh­p / sµn sàng</text>
+
+  <rect x="372" y="476" width="240" height="44" rx="12" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="438" y="504" fill="#122033" font-family="Arial" font-size="14" font-weight="700">Cài ·t CLI</text>
+  <rect x="624" y="476" width="240" height="44" rx="12" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="692" y="504" fill="#122033" font-family="Arial" font-size="14" font-weight="700">C­p nh­t CLI</text>
+  <rect x="876" y="476" width="256" height="44" rx="12" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="914" y="504" fill="#122033" font-family="Arial" font-size="14" font-weight="700">KiÃm tra t°¡ng thích</text>
+
+  <rect x="335" y="490" width="825" height="0" fill="none"/>
+
+  <rect x="335" y="494" width="825" height="270" rx="18" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="372" y="545" fill="#A15E18" font-family="Arial" font-size="18" font-weight="700">K¿t nÑi Zalo Bot</text>
+  <rect x="372" y="565" width="500" height="46" rx="12" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="392" y="594" fill="#607182" font-family="Arial" font-size="14">Bot Token</text>
+  <rect x="372" y="620" width="500" height="46" rx="12" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="392" y="649" fill="#607182" font-family="Arial" font-size="14">Chat ID nh­n báo cáo</text>
+
+  <rect x="372" y="675" width="220" height="44" rx="12" fill="#2F6DFF"/>
+  <text x="410" y="703" fill="#fff" font-family="Arial" font-size="14" font-weight="800">L°u token</text>
+  <rect x="606" y="675" width="220" height="44" rx="12" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="665" y="703" fill="#607182" font-family="Arial" font-size="14" font-weight="700">Tìm Chat ID</text>
+  <rect x="840" y="675" width="320" height="44" rx="12" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="905" y="703" fill="#607182" font-family="Arial" font-size="14" font-weight="700">Gíi thí</text>
+</svg>

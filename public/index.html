@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Zalo Work Digest</title>
+  <link rel="icon" type="image/png" href="/images/app-icon.png">
+  <link rel="apple-touch-icon" href="/images/app-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/notices.css">
+  <link rel="stylesheet" href="/settings.css">
+  <link rel="stylesheet" href="/modern-theme.css">
+  <script>
+    (function () {
+      var k = "zalo-digest-ui-scale";
+      var s = localStorage.getItem(k);
+      if (s) document.documentElement.style.zoom = s;
+    })();
+  </script>
+</head>
+<body>
+  <aside>
+    <div class="brand"><span>Z</span><div>Zalo Work Digest<small>Tóm tắt công việc cá nhân</small></div></div>
+    <nav>
+      <button class="nav active" data-page="dashboard">Tổng quan</button>
+      <button class="nav" data-page="groups">Nhóm theo dõi</button>
+      <button class="nav" data-page="reports">Báo cáo</button>
+      <button class="nav" data-page="notifications">Thông báo & xuất dữ liệu</button>
+      <button class="nav" data-page="schedules">Giao việc & hẹn giờ</button>
+      <button class="nav" data-page="guide">Hướng dẫn</button>
+      <button class="nav" data-page="settings">Cài đặt</button>
+    </nav>
+    <div class="connection-box">
+      <div id="connection" class="connection">Đang kiểm tra…</div>
+      <button id="logoutBtn" class="logout hidden" type="button">Đăng xuất Zalo</button>
+      <div id="saasUserBox" class="hidden" style="margin-top:10px;font-size:.85rem;opacity:.85"></div>
+      <button id="saasLogoutBtn" class="logout secondary hidden" type="button">Thoát tài khoản web</button>
+    </div>
+  </aside>
+  <main>
+    <header>
+      <div>
+        <h1 id="title">Tổng quan</h1>
+        <p>Mỗi tài khoản Zalo có dữ liệu riêng trên máy này</p>
+      </div>
+      <button id="sync" class="secondary">Đồng bộ nhóm</button>
+    </header>
+    <div id="webNotice" class="web-notice hidden" role="status" aria-live="polite"></div>
+    <div id="zaloGateNotice" class="web-notice error hidden" role="status">Cần đăng nhập Zalo bằng QR trước khi dùng tính năng. Cấu hình AI/Bot đã lưu vẫn được giữ.</div>
+    <section id="loginCard" class="card login hidden">
+      <div>
+        <h2>Kết nối Zalo cá nhân</h2>
+        <p>Không cần tạo bot hoặc SIM mới. Quét QR bằng tài khoản đang sử dụng.</p>
+        <p class="warning">Không mở Zalo Web trong lúc ứng dụng đang nghe tin nhắn.</p>
+      </div>
+      <div id="qrArea"><button id="loginBtn">Tạo mã QR</button></div>
+    </section>
+    <section id="dashboard" class="page">
+      <div class="metrics">
+        <div class="card metric"><b id="enabledCount">0</b><span>Nhóm đang theo dõi</span></div>
+        <div class="card metric"><b id="messageCount">0</b><span>Tin nhắn hôm nay</span></div>
+        <div class="card metric"><b id="scheduleCount">0</b><span>Lịch gửi gần đây</span></div>
+      </div>
+
+      <div class="dashboard-grid">
+        <article class="card dash-panel recent-panel">
+          <div class="panel-head"><h2>Hoạt động gần đây</h2></div>
+          <div id="dashRecentList" class="panel-list"></div>
+        </article>
+
+        <article class="card dash-panel chart-panel">
+          <div class="panel-head">
+            <h2 id="dashChartTitle">Tin nhắn theo giờ (hôm nay)</h2>
+            <div class="chart-mode-tabs" role="tablist">
+              <button type="button" class="chart-mode active" data-mode="hour">Giờ</button>
+              <button type="button" class="chart-mode" data-mode="day">Ngày</button>
+              <button type="button" class="chart-mode" data-mode="month">Tháng</button>
+            </div>
+          </div>
+          <div id="dashHourChart" class="hour-chart"></div>
+          <div class="chart-summary">
+            <div><span>Cao nhất</span><strong id="dashPeakHour">—</strong></div>
+            <div><span>Trung bình</span><strong id="dashAvgPerHour">0 tin</strong></div>
+            <div><span>Tổng</span><strong id="dashTotalToday">0 tin</strong></div>
+          </div>
+          <div id="dashChartMessages" class="chart-msg-panel hidden">
+            <div class="chart-msg-head">
+              <strong id="dashChartMsgTitle">Danh sách tin</strong>
+              <button type="button" id="closeChartMessages" class="secondary">Đóng</button>
+            </div>
+            <div id="dashChartMsgList" class="chart-msg-list"></div>
+          </div>
+        </article>
+
+        <article class="card dash-panel attention-panel">
+          <div class="panel-head"><h2>Tin cần chú ý (24h)</h2></div>
+          <div id="dashAttentionList" class="panel-list"></div>
+        </article>
+
+        <article class="card dash-panel schedule-panel">
+          <div class="panel-head"><h2>Lịch gửi sắp tới</h2></div>
+          <div id="dashScheduleList" class="compact-list"></div>
+        </article>
+
+        <article class="card dash-panel report-panel">
+          <div class="panel-head"><h2>Báo cáo gần đây</h2></div>
+          <div id="dashReportList" class="compact-list"></div>
+        </article>
+
+        <article class="card dash-panel ai-panel">
+          <div class="panel-head"><h2>Trạng thái kết nối</h2></div>
+          <div class="conn-stack">
+            <div class="conn-block">
+              <div class="conn-label">AI</div>
+              <div id="dashAiStatus" class="ai-status-box">Đang tải trạng thái AI…</div>
+            </div>
+            <div class="conn-block">
+              <div class="conn-label">Zalo Bot</div>
+              <div id="dashBotStatus" class="ai-status-box">Đang tải trạng thái Bot…</div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+    <section id="groups" class="page hidden">
+      <div class="card">
+        <h2>Danh sách nhóm</h2>
+        <p>Chỉ tin nhắn mới của nhóm được bật mới được lưu.</p>
+        <div id="groupList" class="group-list"></div>
+      </div>
+    </section>
+    <section id="reports" class="page hidden">
+      <div class="card form">
+        <h2>Tạo báo cáo</h2>
+        <label>Nhóm<select id="reportGroup"></select></label>
+        <label>Khoảng thời gian<select id="reportRange"><option value="24">24 giờ qua</option><option value="8">8 giờ qua</option><option value="72">3 ngày qua</option></select></label>
+        <button id="digestBtn">Tạo bản tổng hợp</button>
+      </div>
+      <pre id="digestOutput" class="card output">Chưa có báo cáo.</pre>
+    </section>
+    <section id="notifications" class="page hidden">
+      <div class="card">
+        <h2>Tin cần chú ý</h2>
+        <p>Lọc tin riêng, tin tag bạn, hoặc tìm theo nhóm / người / từ khóa / khoảng ngày.</p>
+        <div class="filter-bar form-inline">
+          <label>Từ<input id="alertFrom" type="datetime-local"></label>
+          <label>Đến<input id="alertTo" type="datetime-local"></label>
+          <label>Nhóm<select id="alertGroup"><option value="">Tất cả nhóm / chat</option></select></label>
+          <label>Người gửi<input id="alertSender" type="search" placeholder="Tên hoặc để trống" list="alertSenderList"></label>
+          <datalist id="alertSenderList"></datalist>
+          <label>Từ khóa<input id="alertKeyword" type="search" placeholder="gấp, deadline…"></label>
+          <label>Loại<select id="alertKind">
+            <option value="">Tag + tin riêng</option>
+            <option value="mention">Chỉ tag bạn</option>
+            <option value="dm">Chỉ tin riêng</option>
+            <option value="all">Mọi tin đã lưu</option>
+          </select></label>
+        </div>
+        <div class="toolbar">
+          <button id="refreshAlerts">Làm mới</button>
+          <button id="toggleAlertsCompact" class="secondary">Thu gọn danh sách</button>
+          <button id="exportAlerts" class="secondary">Xuất CSV</button>
+          <button id="exportAlertsFull" class="secondary">Xuất CSV đầy đủ</button>
+          <button id="viewAssets" class="secondary">Xem ảnh/tệp đã lưu</button>
+        </div>
+        <div id="alertList" class="alert-list"></div>
+        <div id="assetList" class="alert-list"></div>
+      </div>
+      <div class="card form">
+        <h2>Quy tắc cảnh báo</h2>
+        <p>Khi tin khớp từ khóa hoặc tag bạn, có thể đánh dấu ưu tiên và đẩy ngay qua Zalo Bot.</p>
+        <label>Tên quy tắc<input id="ruleName" placeholder="Ví dụ: Deadline gấp"></label>
+        <label>Từ khóa (phân tách bằng dấu phẩy)<input id="ruleKeywords" placeholder="gấp, deadline, hạn"></label>
+        <label>Nhóm<select id="ruleGroup"><option value="*">Tất cả nhóm đang theo dõi</option></select></label>
+        <label>Ưu tiên<select id="rulePriority"><option value="normal">Bình thường</option><option value="high">Cao</option></select></label>
+        <label class="check-row"><input id="ruleMention" type="checkbox"><span>Chỉ khi có tag mình (và từ khóa nếu có)</span></label>
+        <label class="check-row"><input id="ruleMatchAny" type="checkbox"><span>Tag mình hoặc từ khóa (chỉ cần một)</span></label>
+        <label class="check-row"><input id="ruleNotifyBot" type="checkbox"><span>Đẩy Zalo Bot ngay khi khớp</span></label>
+        <div class="toolbar">
+          <button id="saveAlertRule" type="button">Thêm quy tắc</button>
+        </div>
+        <div id="alertRuleNotice"></div>
+        <div id="alertRuleList"></div>
+      </div>
+      <div class="card form">
+        <h2>Xuất và gửi tổng hợp theo giờ</h2>
+        <label>Nhóm<select id="digestScheduleGroup"><option value="*">Tất cả nhóm đang theo dõi</option></select></label>
+        <label>Giờ chạy mỗi ngày<input id="digestScheduleTime" type="time" value="17:30"></label>
+        <fieldset class="channel-ticks">
+          <legend>Kênh nhận</legend>
+          <label class="check-row"><input id="digestChannelWeb" type="checkbox" checked><span>Lưu tổng hợp trong app</span></label>
+          <label class="check-row"><input id="digestChannelCsv" type="checkbox" checked><span>Lưu file CSV vào thư mục dữ liệu</span></label>
+          <label class="check-row"><input id="digestChannelBot" type="checkbox"><span>Gửi qua Zalo Bot</span></label>
+          <p class="hint">CSV được ghi vào thư mục <code>exports</code> trong nơi lưu dữ liệu đã chọn (Cài đặt).</p>
+        </fieldset>
+        <button id="createDigestSchedule">Tạo lịch tổng hợp</button>
+        <div id="digestScheduleNotice"></div>
+        <div id="digestScheduleList"></div>
+      </div>
+    </section>
+    <section id="settings" class="page hidden">
+      <div class="settings-grid">
+        <div class="card form settings-span-full" id="uiScaleCard">
+          <div class="settings-card-top">
+            <h2>Tỉ lệ hiển thị</h2>
+          </div>
+          <p class="hint">Thu nhỏ hoặc phóng to toàn bộ giao diện app (chữ, nút, khoảng cách). Áp dụng ngay, lưu trên máy này.</p>
+          <label>Tỉ lệ<select id="uiScale"></select></label>
+          <div id="uiScaleNotice" class="hint"></div>
+        </div>
+        <div class="card form" id="aiSettingsCard">
+          <div class="settings-card-top">
+            <h2>Kết nối AI để tóm tắt</h2>
+            <button id="editAiSettings" type="button" class="secondary settings-edit-btn hidden">Chỉnh sửa</button>
+          </div>
+          <div id="aiSettingsBody" class="settings-body">
+          <p class="ai-lead" id="aiLeadText">Chọn nhà cung cấp rồi <b>đăng nhập tài khoản</b> — không cần dán API key.</p>
+
+          <div class="ai-connect-block" id="aiAccountConnectBlock">
+            <h3 class="ai-connect-title">Đăng nhập tài khoản <span class="ai-connect-tag">không cần API key</span></h3>
+            <div class="ai-provider-picks" id="aiCliPicks">
+              <button type="button" class="ai-pick" data-provider="codex-cli">ChatGPT / Codex</button>
+              <button type="button" class="ai-pick" data-provider="claude-cli">Claude</button>
+              <button type="button" class="ai-pick" data-provider="cliproxyapi">AI brain</button>
+            </div>
+            <p class="hint">AI brain: đăng nhập Google / ChatGPT / Claude qua OAuth local — không cần API key.</p>
+          </div>
+
+          <div class="ai-connect-block hidden" id="aiApiConnectBlock">
+            <h3 class="ai-connect-title">API key <span class="ai-connect-tag">SaaS</span></h3>
+            <div class="ai-provider-picks" id="aiApiPicks">
+              <button type="button" class="ai-pick" data-provider="openai">OpenAI</button>
+              <button type="button" class="ai-pick" data-provider="gemini">Gemini</button>
+              <button type="button" class="ai-pick" data-provider="claude">Claude</button>
+              <button type="button" class="ai-pick" data-provider="custom">Custom</button>
+            </div>
+            <label>Base URL<input id="aiBaseUrlVisible" type="text" spellcheck="false" placeholder="https://api.openai.com/v1"></label>
+            <label>Model<input id="aiModelVisible" type="text" spellcheck="false" placeholder="gpt-4o-mini"></label>
+            <label>API key<input id="aiApiKeyVisible" type="password" autocomplete="off" placeholder="Dán API key — để trống nếu giữ key đã lưu"></label>
+            <p class="hint" id="aiApiKeyHint">Key được mã hóa trên server. Không chia sẻ key công khai.</p>
+          </div>
+
+          <input type="hidden" id="aiProvider" value="codex-cli">
+          <input type="hidden" id="aiBaseUrl" value="">
+          <input type="hidden" id="aiModel" value="">
+          <input type="hidden" id="aiApiKey" value="">
+
+          <label class="check-row"><input id="aiEnabled" type="checkbox"><span>Bật AI cho báo cáo và lịch gửi Zalo Bot</span></label>
+          <label>Yêu cầu tóm tắt<textarea id="aiPrompt" rows="4" placeholder="Ví dụ: Chỉ lấy đầu việc, người phụ trách và deadline..."></textarea></label>
+
+          <div id="aiCliFields" class="hidden ai-detail-panel">
+            <div id="aiCliStatus" class="info-box">Chọn ChatGPT/Codex hoặc Claude ở trên.</div>
+            <div class="toolbar">
+              <button id="loginAiCli" type="button">Đăng nhập trên trình duyệt</button>
+              <button id="installAiCli" type="button" class="secondary">Cài đặt CLI</button>
+              <button id="updateAiCli" type="button" class="secondary">Cập nhật CLI</button>
+              <button id="logoutAiCli" type="button" class="secondary">Xóa phiên</button>
+              <button id="detectAiCli" type="button" class="secondary">Quét lại</button>
+              <button id="checkAiCliCompat" type="button" class="secondary">Kiểm tra tương thích</button>
+            </div>
+            <p class="hint">Bấm <b>Đăng nhập trên trình duyệt</b>, hoàn tất trên web, rồi <b>Lưu cấu hình AI</b>.</p>
+          </div>
+
+          <div id="aiCliProxyFields" class="hidden ai-detail-panel">
+            <div id="aiCliProxyStatus" class="info-box">Đang kiểm tra AI brain…</div>
+            <p class="hint" id="aiCliProxyStepHint">Bước 1/3 — Bấm <b>Khởi động</b> để chạy AI brain.</p>
+            <div id="aiCliProxyStepStart" class="toolbar">
+              <button id="startCliProxy" type="button">Khởi động</button>
+              <button id="refreshCliProxy" type="button" class="secondary">Quét lại</button>
+            </div>
+            <div id="aiCliProxyStepLogin" class="toolbar hidden">
+              <button id="loginCliProxyGoogle" type="button" class="secondary">Đăng nhập Google</button>
+              <button id="loginCliProxyCodex" type="button" class="secondary">Đăng nhập ChatGPT</button>
+              <button id="loginCliProxyClaude" type="button" class="secondary">Đăng nhập Claude</button>
+              <button id="refreshCliProxyLogin" type="button" class="secondary">Quét lại</button>
+            </div>
+            <div id="aiCliProxyStepConnect" class="toolbar hidden">
+              <button id="connectCliProxy" type="button">Kết nối &amp; lưu</button>
+              <button id="refreshCliProxyConnect" type="button" class="secondary">Quét lại</button>
+            </div>
+            <button id="installCliProxy" type="button" class="secondary hidden">Tải AI brain</button>
+          </div>
+
+          <div class="toolbar">
+            <button id="saveAi">Lưu cấu hình AI</button>
+            <button id="testAi" class="secondary">Kiểm tra kết nối AI</button>
+          </div>
+          <div id="aiNotice"></div>
+          </div>
+        </div>
+        <div class="card form" id="dataLocationCard">
+          <div class="settings-card-top">
+            <h2>Nơi lưu dữ liệu</h2>
+          </div>
+          <div id="dataLocationBody" class="settings-body">
+            <p>Toàn bộ nhóm, tin nhắn, lịch, session Zalo và cấu hình AI/Bot dùng chung được lưu trong thư mục này. Đổi chỗ sẽ <b>chuyển dữ liệu hiện có</b> sang thư mục mới.</p>
+            <label>Đường dẫn thư mục
+              <input id="dataLocationPath" type="text" spellcheck="false" placeholder="Ví dụ: D:\ZaloDigestData">
+            </label>
+            <p class="hint" id="dataLocationHint">Đang tải…</p>
+            <div class="toolbar">
+              <button id="browseDataLocation" type="button" class="secondary">Chọn thư mục</button>
+              <button id="saveDataLocation" type="button">Áp dụng</button>
+              <button id="resetDataLocation" type="button" class="secondary">Về mặc định</button>
+            </div>
+            <div id="dataLocationNotice"></div>
+          </div>
+        </div>
+        <div class="card form" id="botSettingsCard">
+          <div class="settings-card-top">
+            <h2>Kết nối Zalo Bot</h2>
+            <div class="settings-card-actions">
+              <button id="toggleBotSettings" type="button" class="secondary settings-toggle-btn">Thu gọn</button>
+              <button id="editBotSettings" type="button" class="secondary settings-edit-btn hidden">Chỉnh sửa</button>
+            </div>
+          </div>
+          <div id="botSettingsBody" class="settings-body">
+          <p class="bot-lead">Zalo Bot giúp app <b>gửi báo cáo / cảnh báo về Zalo</b> cho bạn (hoặc nhóm nhận). Làm lần lượt theo các bước dưới đây — khoảng 5–10 phút.</p>
+
+          <details class="guide-box" open>
+            <summary>Hướng dẫn chi tiết (bấm để thu gọn / mở lại)</summary>
+            <ol class="guide-steps">
+              <li>
+                <b>Bước 1 — Mở Zalo trên điện thoại</b>
+                <ul>
+                  <li>Đăng nhập đúng tài khoản Zalo bạn muốn dùng với app này.</li>
+                  <li>Ở ô tìm kiếm, gõ: <code>Zalo Bot Manager</code>.</li>
+                  <li>Chọn Official Account / trang có tên <b>Zalo Bot Manager</b> (do Zalo cung cấp).</li>
+                </ul>
+              </li>
+              <li>
+                <b>Bước 2 — Tạo bot mới</b>
+                <ul>
+                  <li>Trong cuộc trò chuyện với Zalo Bot Manager, làm theo hướng dẫn trên màn hình để <b>Tạo bot</b> (Create bot).</li>
+                  <li>Đặt tên bot dễ nhớ, ví dụ: <code>Bao cao cong viec</code>.</li>
+                  <li>Sau khi tạo xong, Zalo sẽ gửi cho bạn một dòng gọi là <b>Bot Token</b> — trông giống: <code>1234567890:abcdEFGHijkl...</code></li>
+                  <li>Giữ nguyên tin nhắn đó; bạn sẽ copy Token ở bước sau.</li>
+                </ul>
+              </li>
+              <li>
+                <b>Bước 3 — Dán Bot Token vào app</b>
+                <ul>
+                  <li>Copy toàn bộ Bot Token từ Zalo (không thêm khoảng trắng).</li>
+                  <li>Dán vào ô <b>Bot Token</b> bên dưới.</li>
+                  <li>Bấm <b>Kiểm tra và lưu token</b>. Nếu đúng, app sẽ báo đã lưu / hiện tên bot.</li>
+                </ul>
+              </li>
+              <li>
+                <b>Bước 4 — Lấy Chat ID (nơi nhận tin)</b>
+                <ul>
+                  <li>Mở cuộc trò chuyện với <b>chính bot bạn vừa tạo</b> (không phải Zalo Bot Manager).</li>
+                  <li>Quay lại app này, bấm <b>Bắt đầu tìm Chat ID</b>.</li>
+                  <li><b>Ngay sau đó</b> (trong khoảng 25 giây), trên Zalo hãy nhắn bot một tin bất kỳ, ví dụ: <code>xin chao</code>.</li>
+                  <li>App sẽ tự điền Chat ID vào ô. Nếu không ra, bấm tìm lại rồi nhắn bot thêm lần nữa đúng lúc đang chờ.</li>
+                </ul>
+              </li>
+              <li>
+                <b>Bước 5 — Kiểm tra kết nối</b>
+                <ul>
+                  <li>Bấm <b>Gửi thử thông báo</b>.</li>
+                  <li>Nếu Zalo nhận được tin từ bot → đã xong, có thể dùng gửi báo cáo / cảnh báo.</li>
+                </ul>
+              </li>
+            </ol>
+            <div class="guide-note">
+              <b>Giải thích nhanh:</b>
+              <ul>
+                <li><b>Bot Token</b> = “mật khẩu” để app điều khiển bot của bạn. Không chia sẻ cho người khác.</li>
+                <li><b>Chat ID</b> = địa chỉ cuộc trò chuyện sẽ nhận báo cáo (thường là chat riêng giữa bạn và bot).</li>
+              </ul>
+              <b>Gặp lỗi thường gặp:</b>
+              <ul>
+                <li>Không tìm thấy Chat ID → bấm “Bắt đầu tìm” <i>trước</i>, rồi mới nhắn bot trong 25 giây.</li>
+                <li>Token sai → copy lại từ tin Zalo Bot Manager, không thiếu ký tự.</li>
+                <li>Gửi thử không về → kiểm tra đã lưu Token + Chat ID, và đã nhắn bot ít nhất một lần.</li>
+              </ul>
+            </div>
+            <p class="hint">Tài liệu gốc của Zalo (tiếng Anh/kỹ thuật hơn): <a href="https://bot.zapps.me/docs/create-bot/" target="_blank" rel="noreferrer">bot.zapps.me/docs/create-bot</a></p>
+          </details>
+
+          <label>Bot Token<input id="botToken" type="password" autocomplete="off" placeholder="Dán Bot Token từ Zalo Bot Manager"></label>
+          <label>Chat ID nhận báo cáo<input id="botChatId" placeholder="Bấm nút tìm bên dưới hoặc dán Chat ID"></label>
+          <p class="hint bot-step-hint">Làm lần lượt — nút đang cần bấm sẽ được tô màu xanh; xong từng bước sẽ chuyển xanh lá.</p>
+          <div class="toolbar bot-step-toolbar">
+            <button id="saveBot" type="button" data-step="1">Bước 1 · Kiểm tra và lưu token</button>
+            <button id="discoverBot" type="button" class="secondary" data-step="2">Bước 2 · Bắt đầu tìm Chat ID (sau đó nhắn bot)</button>
+            <button id="testBot" type="button" class="secondary" data-step="3">Bước 3 · Gửi thử thông báo</button>
+          </div>
+          <div id="botNotice"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="guide" class="page hidden">
+      <div class="guide-page">
+        <div class="card guide-hero">
+          <h2>Bắt đầu nhanh</h2>
+          <p>Cài xong là dùng được — không cần cài thêm phần mềm bên ngoài. Làm lần lượt các bước dưới đây.</p>
+          <ol class="guide-quick">
+            <li><b>Đăng nhập Zalo</b> — quét QR bằng app Zalo trên điện thoại.</li>
+            <li><b>Chọn nhóm theo dõi</b> — bật các nhóm cần tóm tắt.</li>
+            <li><b>Cấu hình AI</b> — vào Cài đặt → AI brain (hoặc ChatGPT/Claude).</li>
+            <li><b>Tạo báo cáo</b> — vào tab Báo cáo khi cần tóm tắt.</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <h2>1. Đăng nhập Zalo</h2>
+          <ul class="guide-list">
+            <li>Ở màn hình chính, bấm <b>Tạo mã QR</b> rồi mở Zalo điện thoại → Quét mã.</li>
+            <li>Không mở Zalo Web cùng lúc khi app đang nghe tin nhắn.</li>
+            <li>Mỗi tài khoản Zalo có dữ liệu riêng trên máy này.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>2. Các tab chính</h2>
+          <ul class="guide-list">
+            <li><b>Tổng quan</b> — xem nhanh nhóm, tin nhắn, lịch và trạng thái AI/Bot.</li>
+            <li><b>Nhóm theo dõi</b> — bật/tắt nhóm cần theo dõi và đồng bộ danh sách nhóm.</li>
+            <li><b>Báo cáo</b> — chọn nhóm + khoảng thời gian để AI (hoặc chế độ local) tóm tắt.</li>
+            <li><b>Thông báo & xuất dữ liệu</b> — cảnh báo từ khóa, xuất CSV, lịch gửi báo cáo.</li>
+            <li><b>Giao việc & hẹn giờ</b> — tag thành viên, nhắc việc một lần hoặc hằng ngày.</li>
+            <li><b>Cài đặt</b> — tỉ lệ giao diện, AI, nơi lưu dữ liệu, Zalo Bot.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>3. Cấu hình AI (Cài đặt)</h2>
+          <p class="hint">Chọn một trong các cách đăng nhập tài khoản — không cần dán API key.</p>
+          <ul class="guide-list">
+            <li><b>ChatGPT / Codex</b> hoặc <b>Claude</b> — bấm Đăng nhập trên trình duyệt, hoàn tất rồi Lưu.</li>
+            <li><b>AI brain</b> (khuyến nghị cho Google/đa tài khoản):
+              <ol>
+                <li>Bấm <b>Khởi động</b></li>
+                <li>Đăng nhập Google / ChatGPT / Claude</li>
+                <li>Bấm <b>Kết nối &amp; lưu</b></li>
+              </ol>
+            </li>
+            <li>Bật ô <b>Bật AI cho báo cáo…</b> rồi kiểm tra kết nối nếu muốn.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h2>4. Nơi lưu dữ liệu & Zalo Bot</h2>
+          <ul class="guide-list">
+            <li><b>Nơi lưu dữ liệu</b> — chọn ổ đĩa/thư mục để lưu nhóm, tin nhắn, session. Có thể đổi và chuyển dữ liệu.</li>
+            <li><b>Zalo Bot</b> (tuỳ chọn) — tạo bot trên Zalo Bot Manager, dán token, tìm Chat ID, gửi thử để nhận báo cáo/cảnh báo trên Zalo.</li>
+          </ul>
+        </div>
+
+        <div class="card guide-support">
+          <h2>Hỗ trợ khi gặp khó khăn</h2>
+          <p>Cần hỗ trợ cài đặt hoặc cấu hình, liên hệ:</p>
+          <div class="support-box">
+            <div class="support-label">Zalo hỗ trợ cài đặt</div>
+            <div class="support-name">Trà My</div>
+            <a class="support-phone" href="https://zalo.me/0334604269" target="_blank" rel="noreferrer">0334 604 269</a>
+            <div class="support-actions">
+              <a class="button-link" href="https://zalo.me/0334604269" target="_blank" rel="noreferrer">Nhắn Zalo Trà My</a>
+              <a class="button-link secondary" href="tel:0334604269">Gọi điện</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="schedules" class="page hidden">
+      <div class="card form">
+        <h2>Tag, giao việc và hẹn giờ</h2>
+        <label>Gửi đến<select id="targetType"><option value="group">Nhóm Zalo</option><option value="user">Cá nhân trong danh bạ</option></select></label>
+        <label id="groupTargetLabel">Nhóm<input id="groupSearch" type="search" placeholder="Gõ tên nhóm để tìm..."><select id="scheduleGroup"></select></label>
+        <label id="userTargetLabel" class="hidden">Người nhận<input id="contactSearch" type="search" placeholder="Gõ tên Zalo để tìm..."><select id="scheduleContact"></select></label>
+        <label id="memberTargetLabel">Thành viên cần tag<div id="memberList" class="members"></div></label>
+        <label>Nội dung giao việc<textarea id="scheduleContent" rows="4" placeholder="Vui lòng gửi báo cáo tiến độ..."></textarea></label>
+        <label>Kiểu nhắc<select id="recurrence"><option value="once">Một lần</option><option value="daily">Hằng ngày</option></select></label>
+        <label id="onceTimeLabel">Thời gian gửi<input id="runAt" type="datetime-local"></label>
+        <div id="dailyTimes" class="hidden">
+          <label>Giờ nhắc mỗi ngày<input id="dailyTime" type="time" value="08:00"></label>
+          <button id="addDailyTime" type="button" class="secondary">+ Thêm khung giờ</button>
+          <div id="dailyTimeList" class="time-list"></div>
+        </div>
+        <button id="scheduleBtn">Xem trước và tạo lịch</button>
+        <div id="scheduleNotice"></div>
+      </div>
+      <div class="card">
+        <h2>Lịch sử lịch gửi</h2>
+        <div id="scheduleList"></div>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

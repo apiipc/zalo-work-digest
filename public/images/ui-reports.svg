@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" fill="none">
+  <rect width="1200" height="760" rx="24" fill="#F6F9FF" stroke="#D7E2FF"/>
+  <rect x="40" y="40" width="260" height="680" rx="16" fill="#0A2A43"/>
+  <text x="80" y="98" fill="#EAF4FF" font-family="Arial" font-size="20" font-weight="700">Zalo Work Digest</text>
+  <text x="80" y="185" fill="#EAF4FF" font-family="Arial" font-size="16">Báo cáo (Digest)</text>
+  <rect x="335" y="46" width="825" height="110" rx="18" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="372" y="92" fill="#173E7A" font-family="Arial" font-size="24" font-weight="700">T¡o báo cáo</text>
+
+  <rect x="335" y="170" width="825" height="240" rx="18" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="380" y="220" fill="#1F4DA3" font-family="Arial" font-size="18" font-weight="700">Nhóm</text>
+  <rect x="455" y="205" width="280" height="46" rx="12" fill="#F7FAFF" stroke="#D7E2FF"/>
+  <text x="470" y="235" fill="#607182" font-family="Arial" font-size="14">Project A</text>
+
+  <text x="380" y="290" fill="#1F4DA3" font-family="Arial" font-size="18" font-weight="700">Kho£ng thÝi gian</text>
+  <rect x="610" y="275" width="150" height="46" rx="12" fill="#F7FAFF" stroke="#D7E2FF"/>
+  <text x="626" y="305" fill="#607182" font-family="Arial" font-size="14">24 giÝ</text>
+
+  <rect x="380" y="350" width="220" height="54" rx="14" fill="#2F6DFF"/>
+  <text x="430" y="386" fill="#fff" font-family="Arial" font-size="16" font-weight="700">T¡o</text>
+
+  <rect x="335" y="430" width="825" height="280" rx="18" fill="#FFFFFF" stroke="#D7E2FF"/>
+  <text x="372" y="472" fill="#173E7A" font-family="Arial" font-size="16" font-weight="700">Digest output</text>
+  <rect x="370" y="498" width="760" height="200" rx="12" fill="#F4F7FA" stroke="#D5E0EA"/>
+  <text x="392" y="530" fill="#122033" font-family="Courier New, monospace" font-size="14">
+    " Ng°Ýi phå trách / deadline
+    " ViÇc ã làm / viÇc c§n làm
+    " Quy¿t Ënh / rçi ro (n¿u có)
+  </text>
+</svg>

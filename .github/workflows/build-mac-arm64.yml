@@ -1,0 +1,57 @@
+# Build macOS Apple Silicon (M1/M2/M3/M4) DMG.
+# Không thể build mac từ Windows — workflow này chạy trên máy Mac (GitHub Actions).
+name: Build macOS arm64
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  mac-arm64:
+    name: macOS Apple Silicon (arm64)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Ensure app icon
+        run: |
+          if [ ! -f build/icon.png ]; then
+            echo "Thiếu build/icon.png — chạy branding trên Windows trước hoặc thêm icon."
+            exit 1
+          fi
+
+      - name: Vendor CLI + AI brain (darwin arm64)
+        run: |
+          npm run vendor:cli
+          npm run vendor:cliproxyapi
+        env:
+          CPA_PLATFORM: darwin
+          CPA_ARCH: arm64
+          FORCE_VENDOR_CPA: "1"
+
+      - name: Build DMG
+        run: npx electron-builder --mac dmg --arm64
+        env:
+          # Bản unsigned — người dùng mở bằng Chuột phải → Open lần đầu
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZaloWorkDigest-mac-arm64
+          path: |
+            dist/*.dmg
+            dist/*.zip
+          if-no-files-found: error

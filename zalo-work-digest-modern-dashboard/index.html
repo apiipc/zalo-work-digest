@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b2b66">
+  <title>Zalo Work Digest — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body>
+  <svg class="svg-sprite" aria-hidden="true">
+    <symbol id="i-home" viewBox="0 0 24 24">
+      <path d="M3 10.5 12 3l9 7.5v9a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H4.5A1.5 1.5 0 0 1 3 19.5z"/>
+    </symbol>
+    <symbol id="i-users" viewBox="0 0 24 24">
+      <path d="M16 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-3A4.5 4.5 0 0 0 4 18.5V20"/>
+      <circle cx="10" cy="7" r="3.5"/>
+      <path d="M18 8.5a3 3 0 0 1 0 5.8M18.5 20v-1a4 4 0 0 0-2.5-3.7"/>
+    </symbol>
+    <symbol id="i-report" viewBox="0 0 24 24">
+      <rect x="4" y="3" width="16" height="18" rx="2"/>
+      <path d="M8 15v2M12 11v6M16 8v9"/>
+    </symbol>
+    <symbol id="i-inbox" viewBox="0 0 24 24">
+      <path d="M4 4h16v16H4z"/>
+      <path d="M4 14h4l2 3h4l2-3h4"/>
+    </symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24">
+      <rect x="3" y="5" width="18" height="16" rx="2"/>
+      <path d="M7 3v4M17 3v4M3 10h18"/>
+      <path d="m9 15 2 2 4-4"/>
+    </symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V20h-3v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 7.1 15a1.7 1.7 0 0 0-1.55-1H5v-3h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06L8.36 5l.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1-1.55V3h3v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.12 2.12-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.55 1H21v3h-.09a1.7 1.7 0 0 0-1.51 1.7Z"/>
+    </symbol>
+    <symbol id="i-search" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="7"/>
+      <path d="m20 20-4-4"/>
+    </symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24">
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/>
+      <path d="M10 21h4"/>
+    </symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24">
+      <path d="M20 7v5h-5"/>
+      <path d="M4 17v-5h5"/>
+      <path d="M6.1 8A7 7 0 0 1 18 6l2 2M17.9 16A7 7 0 0 1 6 18l-2-2"/>
+    </symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M12 7v5l3 2"/>
+    </symbol>
+    <symbol id="i-message" viewBox="0 0 24 24">
+      <path d="M4 4h16v12H8l-4 4z"/>
+      <path d="M8 9h8M8 12h5"/>
+    </symbol>
+    <symbol id="i-file" viewBox="0 0 24 24">
+      <path d="M6 2h8l4 4v16H6z"/>
+      <path d="M14 2v5h5M9 12h6M9 16h6"/>
+    </symbol>
+    <symbol id="i-download" viewBox="0 0 24 24">
+      <path d="M12 3v12"/>
+      <path d="m7 10 5 5 5-5"/>
+      <path d="M5 21h14"/>
+    </symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24">
+      <path d="M10 4H4v16h6"/>
+      <path d="M14 8l4 4-4 4M18 12H9"/>
+    </symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24">
+      <path d="M4 7h16M4 12h16M4 17h16"/>
+    </symbol>
+  </svg>
+
+  <button class="mobile-menu" id="mobileMenu" aria-label="Mở menu">
+    <svg><use href="#i-menu"/></svg>
+  </button>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">Z</div>
+      <div>
+        <strong>Zalo Work Digest</strong>
+        <span>Tóm tắt công việc cá nhân</span>
+      </div>
+    </div>
+
+    <nav class="side-nav" aria-label="Điều hướng chính">
+      <button class="nav-item active" data-section="overview">
+        <svg><use href="#i-home"/></svg>
+        <span>Tổng quan</span>
+      </button>
+      <button class="nav-item" data-section="groups">
+        <svg><use href="#i-users"/></svg>
+        <span>Nhóm theo dõi</span>
+      </button>
+      <button class="nav-item" data-section="reports">
+        <svg><use href="#i-report"/></svg>
+        <span>Báo cáo</span>
+      </button>
+      <button class="nav-item" data-section="notifications">
+        <svg><use href="#i-inbox"/></svg>
+        <span>Thông báo & xuất dữ liệu</span>
+      </button>
+      <button class="nav-item" data-section="schedules">
+        <svg><use href="#i-calendar"/></svg>
+        <span>Giao việc & hẹn giờ</span>
+      </button>
+      <button class="nav-item" data-section="settings">
+        <svg><use href="#i-settings"/></svg>
+        <span>Cài đặt</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-art" aria-hidden="true">
+      <div class="moon"></div>
+      <div class="mountain mountain-back"></div>
+      <div class="mountain mountain-front"></div>
+    </div>
+
+    <div class="connection-card">
+      <div class="connection-title">
+        <span class="status-dot"></span>
+        <strong>Kết nối: <em>Đã kết nối</em></strong>
+      </div>
+      <p>Zalo: 0123 456 789</p>
+      <p>Đăng nhập lúc: 08:45 20/05/2025</p>
+      <button class="logout-btn">
+        <svg><use href="#i-logout"/></svg>
+        Đăng xuất
+      </button>
+    </div>
+  </aside>
+
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="welcome">
+        <h1>Xin chào, Minh <span>👋</span></h1>
+        <p>Dưới đây là tổng quan công việc của bạn hôm nay.</p>
+      </div>
+
+      <div class="topbar-actions">
+        <label class="search-box">
+          <input type="search" placeholder="Tìm kiếm nhanh...">
+          <svg><use href="#i-search"/></svg>
+        </label>
+
+        <button class="icon-btn notification-btn" aria-label="Thông báo">
+          <svg><use href="#i-bell"/></svg>
+          <span class="badge">3</span>
+        </button>
+
+        <div class="profile">
+          <div class="avatar avatar-photo">MN</div>
+          <span class="online-dot"></span>
+        </div>
+
+        <button class="sync-btn">
+          <svg><use href="#i-refresh"/></svg>
+          Đồng bộ nhóm
+        </button>
+      </div>
+    </header>
+
+    <section class="dashboard-grid">
+      <article class="card stat-card">
+        <div class="stat-icon blue"><svg><use href="#i-users"/></svg></div>
+        <div class="stat-body">
+          <span>Nhóm đang theo dõi</span>
+          <strong>24</strong>
+          <small class="positive">↑ 12%</small>
+          <p>So với hôm qua</p>
+        </div>
+        <div class="mini-chart blue-line">
+          <i style="--x:0;--y:35%"></i><i style="--x:20%;--y:55%"></i><i style="--x:40%;--y:20%"></i><i style="--x:60%;--y:45%"></i><i style="--x:80%;--y:65%"></i><i style="--x:100%;--y:90%"></i>
+        </div>
+      </article>
+
+      <article class="card stat-card">
+        <div class="stat-icon green"><svg><use href="#i-message"/></svg></div>
+        <div class="stat-body">
+          <span>Tin nhắn hôm nay</span>
+          <strong>368</strong>
+          <small class="positive">↑ 18%</small>
+          <p>So với hôm qua</p>
+        </div>
+        <div class="mini-chart green-line">
+          <i style="--x:0;--y:25%"></i><i style="--x:20%;--y:45%"></i><i style="--x:40%;--y:70%"></i><i style="--x:60%;--y:50%"></i><i style="--x:80%;--y:85%"></i><i style="--x:100%;--y:60%"></i>
+        </div>
+      </article>
+
+      <article class="card stat-card">
+        <div class="stat-icon purple"><svg><use href="#i-report"/></svg></div>
+        <div class="stat-body">
+          <span>Báo cáo đã tạo</span>
+          <strong>7</strong>
+          <small class="positive">↑ 40%</small>
+          <p>7 ngày qua</p>
+        </div>
+        <div class="mini-chart purple-line">
+          <i style="--x:0;--y:28%"></i><i style="--x:20%;--y:48%"></i><i style="--x:40%;--y:20%"></i><i style="--x:60%;--y:85%"></i><i style="--x:80%;--y:55%"></i><i style="--x:100%;--y:85%"></i>
+        </div>
+      </article>
+
+      <article class="card stat-card">
+        <div class="stat-icon orange"><svg><use href="#i-clock"/></svg></div>
+        <div class="stat-body">
+          <span>Lịch gửi gần đây</span>
+          <strong>3</strong>
+          <small class="neutral">—</small>
+          <p>Hôm nay</p>
+        </div>
+        <div class="mini-chart orange-line">
+          <i style="--x:0;--y:30%"></i><i style="--x:20%;--y:60%"></i><i style="--x:40%;--y:30%"></i><i style="--x:60%;--y:75%"></i><i style="--x:80%;--y:45%"></i><i style="--x:100%;--y:85%"></i>
+        </div>
+      </article>
+
+      <article class="card recent-card">
+        <div class="card-head">
+          <h2>Hoạt động gần đây</h2>
+        </div>
+        <div class="activity-list">
+          <div class="activity-row">
+            <div class="avatar group-avatar blue-bg">M</div>
+            <div><strong>Nhóm Marketing</strong><span>Có 12 tin nhắn mới</span></div>
+            <time>09:45</time><i class="unread"></i>
+          </div>
+          <div class="activity-row">
+            <div class="avatar group-avatar green-bg">@</div>
+            <div><strong>Dự án Website</strong><span>Bạn được <b>@Minh</b> tag trong tin nhắn</span></div>
+            <time>09:20</time><i class="unread"></i>
+          </div>
+          <div class="activity-row">
+            <div class="avatar group-avatar blue-bg">KD</div>
+            <div><strong>Nhóm Kinh doanh</strong><span>Có 8 tin nhắn mới</span></div>
+            <time>08:50</time><i class="unread"></i>
+          </div>
+          <div class="activity-row">
+            <div class="avatar group-avatar red-bg">Q2</div>
+            <div><strong>Họp triển khai Q2</strong><span>Có file mới được chia sẻ</span></div>
+            <time>08:15</time><i class="unread"></i>
+          </div>
+          <div class="activity-row">
+            <div class="avatar group-avatar purple-bg">@</div>
+            <div><strong>Phòng Nhân sự</strong><span>Bạn được <b>@Lan</b> tag trong tin nhắn</span></div>
+            <time>07:30</time><i class="unread"></i>
+          </div>
+        </div>
+        <a class="view-all" href="#">Xem tất cả hoạt động <span>→</span></a>
+      </article>
+
+      <article class="card chart-card">
+        <div class="card-head">
+          <h2>Tin nhắn theo giờ <span>(hôm nay)</span></h2>
+        </div>
+        <div class="bar-chart-wrap">
+          <div class="y-axis"><span>80</span><span>60</span><span>40</span><span>20</span><span>0</span></div>
+          <div class="bar-chart">
+            <div class="grid-line" style="--row:0"></div>
+            <div class="grid-line" style="--row:1"></div>
+            <div class="grid-line" style="--row:2"></div>
+            <div class="grid-line" style="--row:3"></div>
+            <div class="grid-line" style="--row:4"></div>
+            <div class="bars">
+              <i style="--h:5%"></i><i style="--h:8%"></i><i style="--h:12%"></i><i style="--h:18%"></i>
+              <i style="--h:25%"></i><i style="--h:38%"></i><i style="--h:48%"></i><i style="--h:66%"></i>
+              <i class="peak" style="--h:80%" data-label="56 tin nhắn"></i><i style="--h:52%"></i><i style="--h:76%"></i><i style="--h:58%"></i>
+              <i style="--h:70%"></i><i style="--h:50%"></i><i style="--h:62%"></i><i style="--h:43%"></i>
+              <i style="--h:55%"></i><i style="--h:36%"></i><i style="--h:29%"></i><i style="--h:22%"></i>
+              <i style="--h:15%"></i><i style="--h:11%"></i><i style="--h:7%"></i><i style="--h:4%"></i>
+            </div>
+            <div class="x-axis"><span>00:00</span><span>04:00</span><span>08:00</span><span>12:00</span><span>16:00</span><span>20:00</span><span>24:00</span></div>
+          </div>
+        </div>
+        <div class="chart-summary">
+          <div><span>Cao nhất</span><strong>08:00 – 09:00</strong><small>56 tin</small></div>
+          <div><span>Trung bình</span><strong>23 tin/giờ</strong></div>
+          <div><span>Tổng</span><strong>368 tin</strong></div>
+        </div>
+      </article>
+
+      <article class="card attention-card">
+        <div class="card-head">
+          <h2>Tin cần chú ý (24h)</h2>
+          <a href="#">Xem tất cả</a>
+        </div>
+        <div class="message-list">
+          <div class="message-row">
+            <div class="avatar person gold">MA</div>
+            <div><div><strong>Minh Anh</strong><span class="tag private">NHẮN RIÊNG</span></div><p><b>@Bạn</b> gửi báo cáo giúp mình nhé</p></div>
+            <time>09:40</time><i class="unread"></i>
+          </div>
+          <div class="message-row">
+            <div class="avatar group-avatar blue-bg">M</div>
+            <div><div><strong>Nhóm Marketing</strong><span class="tag mention">ĐỀ CẬP BẠN</span></div><p><b>@Bạn</b> kế hoạch tuần này như thế nào?</p></div>
+            <time>09:15</time><i class="unread"></i>
+          </div>
+          <div class="message-row">
+            <div class="avatar person gray">DW</div>
+            <div><div><strong>Dự án Website</strong><span class="tag mention">ĐỀ CẬP BẠN</span></div><p><b>@Bạn</b> cập nhật tiến độ giúp team</p></div>
+            <time>08:50</time><i class="unread"></i>
+          </div>
+          <div class="message-row">
+            <div class="avatar person pink">LP</div>
+            <div><div><strong>Lan Phương</strong><span class="tag private">NHẮN RIÊNG</span></div><p>File báo cáo tháng 5 đã xong nhé</p></div>
+            <time>08:30</time><i class="unread"></i>
+          </div>
+          <div class="message-row">
+            <div class="avatar group-avatar blue-bg">KD</div>
+            <div><div><strong>Nhóm Kinh doanh</strong><span class="tag mention">ĐỀ CẬP BẠN</span></div><p><b>@Bạn</b> khách hàng cần follow up</p></div>
+            <time>07:45</time><i class="unread"></i>
+          </div>
+        </div>
+      </article>
+
+      <article class="card schedule-card">
+        <div class="card-head">
+          <h2>Lịch gửi sắp tới</h2>
+          <a href="#">Xem tất cả</a>
+        </div>
+        <div class="compact-list">
+          <div class="compact-row">
+            <div class="round-icon purple-bg"><svg><use href="#i-calendar"/></svg></div>
+            <div><strong>Báo cáo tổng hợp ngày</strong><span>Hôm nay • 17:30</span></div>
+            <span class="chip">CSV, BOT</span>
+          </div>
+          <div class="compact-row">
+            <div class="round-icon blue-bg"><svg><use href="#i-calendar"/></svg></div>
+            <div><strong>Tổng hợp theo giờ</strong><span>Hôm nay • 20:00</span></div>
+            <span class="chip">WEB, CSV, BOT</span>
+          </div>
+          <div class="compact-row">
+            <div class="round-icon green-bg"><svg><use href="#i-calendar"/></svg></div>
+            <div><strong>Báo cáo cuối tuần</strong><span>Thứ 7 • 09:00</span></div>
+            <span class="chip">CSV, BOT</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="card report-card">
+        <div class="card-head">
+          <h2>Báo cáo gần đây</h2>
+          <a href="#">Xem tất cả</a>
+        </div>
+        <div class="report-list">
+          <div class="report-row">
+            <div><strong>Tổng hợp 24h qua - Nhóm Marketing</strong><span>20/05/2025 17:30</span></div>
+            <span class="file-type pdf">PDF</span>
+            <button class="download-btn" aria-label="Tải xuống"><svg><use href="#i-download"/></svg></button>
+          </div>
+          <div class="report-row">
+            <div><strong>Tổng hợp 24h qua - Tất cả nhóm</strong><span>20/05/2025 17:30</span></div>
+            <span class="file-type csv">CSV</span>
+            <button class="download-btn" aria-label="Tải xuống"><svg><use href="#i-download"/></svg></button>
+          </div>
+          <div class="report-row">
+            <div><strong>Tổng hợp 3 ngày qua - Dự án Website</strong><span>19/05/2025 09:00</span></div>
+            <span class="file-type pdf">PDF</span>
+            <button class="download-btn" aria-label="Tải xuống"><svg><use href="#i-download"/></svg></button>
+          </div>
+        </div>
+      </article>
+
+      <article class="card ai-card">
+        <div class="card-head">
+          <h2>Trạng thái kết nối AI</h2>
+          <span class="ready"><i></i>Sẵn sàng</span>
+        </div>
+        <div class="ai-services">
+          <div><strong>◉ OpenAI</strong><span>✦ Kết nối</span></div>
+          <div><strong>✦ Gemini</strong><span>✦ Kết nối</span></div>
+          <div><strong>Claude CLI</strong><span>Đã đăng nhập</span></div>
+          <div><strong>Codex CLI</strong><span>Đã đăng nhập</span></div>
+        </div>
+        <div class="usage">
+          <div class="usage-head"><strong>Mức sử dụng (tháng này)</strong><span>Còn lại 77%</span></div>
+          <div class="usage-value"><strong>23%</strong><div class="progress"><i></i></div></div>
+          <p>Đã dùng 230 / 1.000 lượt tóm tắt</p>
+        </div>
+      </article>
+    </section>
+
+    <footer class="tip-bar">
+      <span class="tip-icon">✦</span>
+      <p><strong>Mẹo hay:</strong> Bạn có thể tạo lịch tổng hợp theo giờ để không bỏ lỡ thông tin quan trọng.</p>
+      <a href="#">Thiết lập ngay <span>→</span></a>
+    </footer>
+  </main>
+
+  <script>
+    const sidebar = document.getElementById('sidebar');
+    const menuButton = document.getElementById('mobileMenu');
+
+    menuButton.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
+
+    document.querySelectorAll('.nav-item').forEach((item) => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach((nav) => nav.classList.remove('active'));
+        item.classList.add('active');
+        if (window.innerWidth <= 900) sidebar.classList.remove('open');
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      if (window.innerWidth <= 900 && sidebar.classList.contains('open')) {
+        const clickedInside = sidebar.contains(event.target) || menuButton.contains(event.target);
+        if (!clickedInside) sidebar.classList.remove('open');
+      }
+    });
+  </script>
+</body>
+</html>
