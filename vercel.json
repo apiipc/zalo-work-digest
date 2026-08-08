@@ -1,7 +1,11 @@
 {
   "version": 2,
-  "buildCommand": "node scripts/sync-vercel-license.js",
-  "outputDirectory": "license-portal/public",
-  "installCommand": "echo skip-install",
-  "framework": null
+  "builds": [
+    { "src": "api/**/*.js", "use": "@vercel/node" },
+    { "src": "license-portal/public/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/license-portal/public/$1" }
+  ]
 }
