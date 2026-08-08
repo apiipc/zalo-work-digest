@@ -42,10 +42,11 @@ export function issueLicense({
   for (let i = 0; i < n; i++) {
     const cust = String(customer || "").trim();
     const noteText = [cust && `KH:${cust}`, String(note || "").trim()].filter(Boolean).join(" | ").slice(0, 40);
-    const { key, payload } = createLicenseKey({ type, days, note: noteText });
+    const { key, code, payload } = createLicenseKey({ type, days, note: noteText });
     const row = {
       id: payload.id,
       key,
+      code,
       type: payload.t === "life" ? "lifetime" : "trial",
       days: payload.t === "life" ? null : payload.d,
       customer: cust,
@@ -66,7 +67,7 @@ export function listLicenses({ q = "", status = "" } = {}) {
   return readVault().keys.filter(row => {
     if (st && row.status !== st) return false;
     if (!query) return true;
-    const hay = [row.customer, row.note, row.key, row.id, row.type].join(" ").toLowerCase();
+    const hay = [row.customer, row.note, row.key, row.code, row.id, row.type].join(" ").toLowerCase();
     return hay.includes(query);
   });
 }
@@ -106,7 +107,11 @@ export function getVaultFilePath() {
 }
 
 export function verifyKeyInVault(raw) {
-  const { key, payload } = parseLicenseKey(raw);
-  const row = readVault().keys.find(k => k.id === payload.id || k.key === key);
-  return { key, payload, record: row || null };
+  const parsed = parseLicenseKey(raw);
+  const row = readVault().keys.find(k =>
+    k.id === parsed.payload?.id ||
+    k.key === parsed.key ||
+    (parsed.code && k.code === parsed.code)
+  );
+  return { key: parsed.key, payload: parsed.payload, record: row || null };
 }

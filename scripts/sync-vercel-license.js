@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Đồng bộ license-portal → api/ + lib/ (cho deploy Vercel từ root repo). */
+/** Đồng bộ api/ + lib/ (deploy Vercel) → license-portal/ (bản mirror trong repo). */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,5 +12,5 @@ function cp(src, dest) {
   console.log(`synced ${path.relative(root, src)} -> ${path.relative(root, dest)}`);
 }
 
-cp(path.join(root, "license-portal", "api"), path.join(root, "api"));
-cp(path.join(root, "license-portal", "lib"), path.join(root, "lib"));
+cp(path.join(root, "api"), path.join(root, "license-portal", "api"));
+cp(path.join(root, "lib"), path.join(root, "license-portal", "lib"));

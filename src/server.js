@@ -167,9 +167,9 @@ app.get("/api/app-mode", (_req, res) => res.json({
   }
 }));
 
-app.get("/api/license", (_req, res) => {
-  res.json(getLicenseStatus());
-});
+app.get("/api/license", asyncRoute(async (_req, res) => {
+  res.json(await getLicenseStatus());
+}));
 app.post("/api/license/activate", asyncRoute(async (req, res) => {
   try {
     const status = await activateLicenseKey(req.body?.key || req.body?.licenseKey || "");

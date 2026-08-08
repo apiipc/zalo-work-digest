@@ -24,6 +24,9 @@ process.env.ZALO_DIGEST_ROOT = projectRoot;
 process.env.ZALO_DIGEST_APP_PATH = isPackaged ? app.getAppPath() : projectRoot;
 process.env.ZALO_DIGEST_CONFIG_DIR = configDir;
 process.env.ZALO_DIGEST_USER_DATA = userData;
+if (!process.env.LICENSE_SERVER_URL) {
+  process.env.LICENSE_SERVER_URL = "https://zalo-work-digest.vercel.app";
+}
 if (fs.existsSync(path.join(cliRoot, "node_modules"))) {
   process.env.ZALO_DIGEST_CLI_ROOT = cliRoot;
 }

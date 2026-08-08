@@ -4,11 +4,18 @@ import path from "node:path";
 import os from "node:os";
 import { getConfigDir } from "./app-paths.js";
 
-/** Đổi secret này trước khi phát hành rộng — và dùng cùng secret khi chạy generate-license. */
+/** Đổi secret này trước khi phát hành rộng — và dùng cùng secret khi chạy generate-license / Vercel. */
 const DEFAULT_SECRET = "zalo-work-digest-license-v1-change-me-before-release";
+const DEFAULT_SERVER = "https://zalo-work-digest.vercel.app";
 
 export function licenseSecret() {
   return String(process.env.LICENSE_SECRET || DEFAULT_SECRET);
+}
+
+export function licenseServerUrl() {
+  const raw = process.env.LICENSE_SERVER_URL;
+  if (raw === "0" || raw === "off" || raw === "false") return "";
+  return String(raw || DEFAULT_SERVER).replace(/\/$/, "");
 }
 
 function b64url(buf) {
@@ -27,7 +34,7 @@ function licensePath(configDir = getConfigDir()) {
   return path.join(configDir, "license.json");
 }
 
-function machineId() {
+export function machineId() {
   const raw = [os.hostname(), os.userInfo().username, os.platform(), os.arch()].join("|");
   return crypto.createHash("sha256").update(raw).digest("hex").slice(0, 16);
 }
@@ -45,31 +52,54 @@ function writeState(state, configDir = getConfigDir()) {
   fs.writeFileSync(licensePath(configDir), JSON.stringify(state, null, 2), { mode: 0o600 });
 }
 
-/**
- * Tạo mã kích hoạt.
- * @param {{ type: 'trial'|'lifetime', days?: number, note?: string }} opts
- */
 export function createLicenseKey({ type = "trial", days = 5, note = "" } = {}) {
   const t = String(type).toLowerCase() === "lifetime" || type === "life" ? "lifetime" : "trial";
   const d = t === "lifetime" ? 0 : Math.max(1, Math.min(365, Number(days) || 5));
+  const id = crypto.randomBytes(8).toString("hex");
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = crypto.randomBytes(12);
+  let body = "";
+  for (let i = 0; i < 12; i++) body += alphabet[bytes[i] % alphabet.length];
+  const chunks = body.match(/.{1,4}/g) || [];
+  const key = `ZWD-${chunks.join("-")}`;
+  const code = `ZWD${body}`;
   const payload = {
-    v: 1,
+    v: 2,
     t: t === "lifetime" ? "life" : "trial",
     d,
-    id: crypto.randomBytes(8).toString("hex"),
+    id,
+    code,
     note: String(note || "").slice(0, 40)
   };
-  const payloadB64 = b64url(JSON.stringify(payload));
-  const sig = signPayload(payloadB64);
-  const key = `ZWD1.${payloadB64}.${sig}`;
-  return { key, payload };
+  return { key, code, payload };
+}
+
+export function isShortCode(raw) {
+  const n = String(raw || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (!n.startsWith("ZWD") || n.startsWith("ZWD1")) return false;
+  const body = n.slice(3);
+  if (body.length < 12 || body.length > 16) return false;
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  return [...body].every(c => alphabet.includes(c));
 }
 
 export function parseLicenseKey(raw) {
-  const key = String(raw || "").trim().replace(/\s+/g, "");
-  const parts = key.split(".");
+  const input = String(raw || "").trim().replace(/\s+/g, "");
+  if (isShortCode(input)) {
+    const n = input.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    const body = n.slice(3);
+    const chunks = body.match(/.{1,4}/g) || [];
+    const key = `ZWD-${chunks.join("-")}`;
+    return {
+      kind: "short",
+      key,
+      code: n,
+      payload: { v: 2, id: null, code: n, t: null, d: null }
+    };
+  }
+  const parts = input.split(".");
   if (parts.length !== 3 || parts[0] !== "ZWD1") {
-    throw Object.assign(new Error("Mã không đúng định dạng"), { status: 400 });
+    throw Object.assign(new Error("Mã không đúng định dạng (vd: ZWD-XXXX-XXXX-XXXX)"), { status: 400 });
   }
   const [, payloadB64, sig] = parts;
   const expect = signPayload(payloadB64);
@@ -87,10 +117,9 @@ export function parseLicenseKey(raw) {
   if (!payload?.id || !["trial", "life"].includes(payload.t)) {
     throw Object.assign(new Error("Mã không hỗ trợ"), { status: 400 });
   }
-  return { key, payload };
+  return { kind: "legacy", key: input, payload };
 }
 
-/** Bắt đầu dùng thử miễn phí trên máy (một lần), nếu chưa có license. */
 export function ensureFreeTrial({ days = 5, configDir = getConfigDir() } = {}) {
   const state = readState(configDir);
   if (state?.activatedAt) return state;
@@ -104,51 +133,81 @@ export function ensureFreeTrial({ days = 5, configDir = getConfigDir() } = {}) {
     fingerprint: machineId(),
     activatedAt: now,
     expiresAt: now + trialDays * 86400000,
-    note: "Dùng thử miễn phí trên máy này"
+    note: "Dùng thử miễn phí trên máy này",
+    fullKey: null
   };
   writeState(next, configDir);
   return next;
 }
 
-export async function activateLicenseKey(raw, { configDir = getConfigDir() } = {}) {
-  const { key, payload } = parseLicenseKey(raw);
+async function callLicenseServer(key) {
+  const server = licenseServerUrl();
+  if (!server || !key) return { skipped: true };
+  const res = await fetch(`${server}/api/activate`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      key,
+      machineId: machineId(),
+      hostname: os.hostname()
+    })
+  });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
 
-  const server = String(process.env.LICENSE_SERVER_URL || "").replace(/\/$/, "");
+export async function activateLicenseKey(raw, { configDir = getConfigDir() } = {}) {
+  const parsed = parseLicenseKey(raw);
+  const key = parsed.key;
+  const server = licenseServerUrl();
+
+  let typeFromServer = null;
+  let daysFromServer = null;
+  let idFromServer = null;
+
   if (server) {
-    try {
-      const res = await fetch(`${server}/api/activate`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ key, machineId: machineId() })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.status === 403 || data.code === "revoked") {
-        throw Object.assign(new Error(data.error || "Mã đã bị thu hồi"), { status: 403 });
-      }
-      if (!res.ok && res.status >= 500) {
-        // Cloud lỗi: vẫn cho kích hoạt offline nếu chữ ký đúng
-        console.warn("LICENSE_SERVER_URL lỗi:", data.error || res.status);
-      }
-    } catch (error) {
-      if (error.status === 403) throw error;
-      console.warn("Không gọi được LICENSE_SERVER_URL:", error.message);
+    const { res, data } = await callLicenseServer(key);
+    if (
+      res.status === 403 ||
+      res.status === 404 ||
+      ["revoked", "device_limit", "not_registered"].includes(data.code)
+    ) {
+      throw Object.assign(new Error(data.error || "Không kích hoạt được mã"), { status: 403, code: data.code });
     }
+    if (!res.ok && res.status !== 503) {
+      throw Object.assign(new Error(data.error || `Máy chủ license lỗi (${res.status})`), { status: res.status || 500 });
+    }
+    if (res.status === 503) {
+      throw Object.assign(new Error(data.error || "Máy chủ license chưa sẵn sàng (thiếu Upstash)"), { status: 503 });
+    }
+    typeFromServer = data.type || null;
+    daysFromServer = data.days;
+    idFromServer = data.id || null;
+  } else if (parsed.kind === "short") {
+    throw Object.assign(new Error("Mã ngắn cần máy chủ license (LICENSE_SERVER_URL)"), { status: 503 });
   }
 
   const now = Date.now();
-  const isLife = payload.t === "life";
-  const days = isLife ? 0 : Math.max(1, Number(payload.d) || 5);
+  const isLife =
+    typeFromServer === "lifetime" ||
+    parsed.payload?.t === "life";
+  const days = isLife
+    ? 0
+    : Math.max(1, Number(daysFromServer ?? parsed.payload?.d) || 5);
+  const keyId = idFromServer || parsed.payload?.id || parsed.code;
   const state = {
     source: "key",
     type: isLife ? "lifetime" : "trial",
     days,
-    keyId: payload.id,
+    keyId,
     keyFingerprint: crypto.createHash("sha256").update(key).digest("hex").slice(0, 16),
     fingerprint: machineId(),
     activatedAt: now,
     expiresAt: isLife ? null : now + days * 86400000,
-    note: payload.note || "",
-    keyPreview: `${key.slice(0, 12)}…${key.slice(-6)}`
+    note: parsed.payload?.note || "",
+    keyPreview: key,
+    fullKey: key,
+    lastServerCheckAt: Date.now()
   };
   writeState(state, configDir);
   return getLicenseStatus(configDir);
@@ -159,12 +218,7 @@ export function clearLicense({ configDir = getConfigDir() } = {}) {
   return getLicenseStatus(configDir);
 }
 
-export function getLicenseStatus(configDir = getConfigDir()) {
-  let state = readState(configDir);
-  if (!state?.activatedAt) {
-    ensureFreeTrial({ configDir, days: Number(process.env.LICENSE_FREE_TRIAL_DAYS) || 5 });
-    state = readState(configDir);
-  }
+function statusFromState(state) {
   const now = Date.now();
   if (!state?.activatedAt) {
     return {
@@ -176,6 +230,19 @@ export function getLicenseStatus(configDir = getConfigDir()) {
       expiresAt: null,
       daysLeft: null,
       activatedAt: null
+    };
+  }
+  if (state.serverBlocked) {
+    return {
+      ok: false,
+      licensed: false,
+      type: state.type || null,
+      label: "Mã bị khóa",
+      message: state.serverMessage || "Mã đã bị thu hồi hoặc dùng trên máy khác.",
+      expiresAt: state.expiresAt || null,
+      daysLeft: 0,
+      activatedAt: state.activatedAt,
+      keyPreview: state.keyPreview || null
     };
   }
   const isLife = state.type === "lifetime" || state.expiresAt == null;
@@ -223,12 +290,65 @@ export function getLicenseStatus(configDir = getConfigDir()) {
   };
 }
 
-export function requireLicense(req, res, next) {
-  const status = getLicenseStatus();
-  if (status.ok) return next();
-  res.status(402).json({
-    error: status.message || "Cần mã kích hoạt",
-    code: "license_required",
-    license: status
-  });
+const SERVER_CHECK_MS = 5 * 60 * 1000;
+
+/** Đồng bộ với server (thu hồi / đổi máy). */
+export async function syncLicenseWithServer({ configDir = getConfigDir(), force = false } = {}) {
+  let state = readState(configDir);
+  if (!state?.activatedAt) {
+    ensureFreeTrial({ configDir });
+    state = readState(configDir);
+  }
+  if (!state?.fullKey || state.source === "free-trial") {
+    return statusFromState(state);
+  }
+  const server = licenseServerUrl();
+  if (!server) return statusFromState(state);
+
+  const last = Number(state.lastServerCheckAt) || 0;
+  if (!force && !state.serverBlocked && Date.now() - last < SERVER_CHECK_MS) {
+    return statusFromState(state);
+  }
+
+  try {
+    const { res, data } = await callLicenseServer(state.fullKey);
+    if (
+      res.status === 403 ||
+      res.status === 404 ||
+      ["revoked", "device_limit", "not_registered"].includes(data.code)
+    ) {
+      state.serverBlocked = true;
+      state.serverMessage = data.error || "Mã không còn hiệu lực.";
+      state.lastServerCheckAt = Date.now();
+      writeState(state, configDir);
+      return statusFromState(state);
+    }
+    if (res.ok) {
+      state.serverBlocked = false;
+      state.serverMessage = "";
+      state.lastServerCheckAt = Date.now();
+      writeState(state, configDir);
+    }
+  } catch (error) {
+    console.warn("syncLicenseWithServer:", error.message);
+  }
+  return statusFromState(readState(configDir));
+}
+
+export async function getLicenseStatus(configDir = getConfigDir()) {
+  return syncLicenseWithServer({ configDir });
+}
+
+export async function requireLicense(req, res, next) {
+  try {
+    const status = await getLicenseStatus();
+    if (status.ok) return next();
+    res.status(402).json({
+      error: status.message || "Cần mã kích hoạt",
+      code: "license_required",
+      license: status
+    });
+  } catch (error) {
+    next(error);
+  }
 }
